@@ -33,7 +33,8 @@ installed on your system:
   messages directly from script *comments*, avoiding the need to source
   =docopts.sh=.
 
-- [[https://github.com/fniessen/wsl][wsl]] repository (for =bin/docopts=, required in a WSL environment)
+- [[https://github.com/fniessen/wsl][wsl]] repository -- only required if you are a *Windows user working inside WSL*.
+  It provides =bin/docopts= used in that environment.
 
 * Recommended exit codes
 
