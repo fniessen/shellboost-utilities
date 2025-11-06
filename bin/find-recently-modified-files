@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? find-recently-modified-files, Time-stamp: <2025-08-15 Fri 14:05>
+#? find-recently-modified-files, Time-stamp: <2025-11-06 Thu 14:31>
 #? Copyright (C) 2023-2025 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -9,7 +9,9 @@
 
 ##? Usage: find-recently-modified-files [options] [THRESHOLD] [DIRECTORY]
 ##?
-##? Find all files modified in the last THRESHOLD days (including today).
+##? Find all regular files whose *content was last modified* within the past
+##? THRESHOLD days (including today), showing each file’s last modification date
+##? and time.
 ##?
 ##? Arguments:
 ##?   THRESHOLD                     specify the threshold in days [default: 7].
@@ -52,7 +54,7 @@ fi
 readonly DIRECTORY="${DIRECTORY:-./}"
 
 # Define the format for printing file information.
-readonly PRINT_FORMAT="%CY-%Cm-%Cd %Ca %CH:%CM - %P\n"
+readonly PRINT_FORMAT="%TY-%Tm-%Td %Ta %TH:%TM - %P\n"
 
 # Check if the extension variable is set.
 if [[ -n "$extension" ]]; then
