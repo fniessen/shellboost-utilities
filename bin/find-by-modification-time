@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Date Modified.
+# Find files by last modification date.
+# Based on when the file content was last changed.
 
 # Search for files containing the specified pattern in their names
 # (case-insensitive), print their modification timestamp, sort the results by
