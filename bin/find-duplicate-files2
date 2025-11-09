@@ -3,14 +3,16 @@
 # This dup finder saves time by *comparing size first, then MD5 hash*. It doesn't
 # delete anything, just lists them.
 
-find . -path '*/.git/*' -prune -o -not -empty -type f -printf "%s\n" \
+set -euo pipefail
+
+find . -path '*/.git/*' -prune -o -not -empty -type f -printf '%s\n' \
     | sort -rn \
     | uniq -d \
     | xargs -I{} -n1 find . -path '*/.git/*' -prune -o -type f -size {}c -print0 \
     | xargs -0 md5sum \
     | sort \
     | uniq -w32 --all-repeated=separate \
-    | awk '{print $2}'
+    | awk '{sub(/^[0-9a-fA-F]{32}[ *]+/, ""); sub(/^\.\//, ""); print}'
 
 # Exit with a success code.
 exit 0

@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
-# Declare an associative array.
+# Find duplicate files, excluding .git dirs and zero-length files, no "./" prefix.
+
+set -eo pipefail
+
+# Declare associative array for MD5 hashes.
 declare -A md5_array
 
-# Find all files in the current directory and subdirectories.
+# Walk directory tree, NUL-safe.
 while IFS= read -r -d '' file; do
     # Calculate the md5 checksum of the file.
     md5sum=$(md5sum "$file" | awk '{print $1}')
