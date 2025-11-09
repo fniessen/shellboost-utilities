@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
 find . -type d -name '.git' -prune -o -type f -not -empty -print0 \
-    | xargs -0 -n1 md5sum \
+    | xargs -0 -n1 md5sum -b \
     | sort --key=1,32 \
-    | uniq -w 32 -d --all-repeated=separate \
-    | sed -E 's|  \./|  |'
+    | uniq -w 32 -D \
+    | sed -E 's|\*\.\/||' \
+    | awk '{ short=substr($1,1,7); $1=""; sub(/^ +/,""); print short, "", $0 }' \
+    | sort -k2
 
 # Remove duplicate files
 #
