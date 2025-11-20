@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+#? find-big-directories, Time-stamp: <2025-11-20 Thu 16:49>
+#? Copyright (C) 2023-2025 Fabrice Niessen. All rights reserved.
+#?
+#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
+
+##? Usage: find-big-directories [options]
+##?
+##? Find big directories (≥ 100 MB).
+##?
+##? Options:
+##?   -h, --help                    display this help and exit
+##?   -V, --version                 display version information and exit
+
+# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+set -uo pipefail
+
+# Check if 'docopts' command is available.
+if ! command -v docopts > /dev/null 2>&1; then
+    printf >&2 "Error: 'docopts' command not found.\n"
+    exit 2
+fi
+
+# Extract help and version information from the script.
+help=$(grep -E '^##\?' "$0" | cut -c 5-)
+version=$(grep -E '^#\?' "$0" | cut -c 4-)
+
+# Parse command-line arguments using docopts.
+eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
+
+# Set -e to exit on non-zero command status.
+set -e
+
+# Minimum directory size in MB.
+MIN_SIZE=100
+
+# Level-1 directories only, size in MB, filter >= MIN_SIZE, sort desc, top 10.
+du -m --max-depth=1 . \
+    | awk -v min="${MIN_SIZE}" '
+        {
+            size_mb = $1
+            path    = $2
+
+            if (size_mb >= min) {
+                if (size_mb >= 1024) {
+                    # Display in GiB with one decimal
+                    printf "%.1fG\t%s\n", size_mb / 1024, path
+                } else {
+                    # Display in MiB
+                    printf "%dM\t%s\n", size_mb, path
+                }
+            }
+        }
+    ' \
+        | sort -rh -k1,1 \
+        | head -n 10
+
+# Exit with a success code.
+exit 0
