@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? ff, Time-stamp: <2026-01-14 Wed 16:58>
+#? ff, Time-stamp: <2026-06-03 Wed 17:02>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -47,24 +47,28 @@ PATTERN="${PATTERN:-}"
 # Set -e to exit on non-zero command status.
 set -e
 
-# Color configuration.
+# Color configuration. The 'ne' flag prevents grep from emitting erase-line ANSI
+# sequences.
 readonly DIR_COLOR="1;34"               # Blue directory names.
 readonly HIGHLIGHT_COLOR="1;37;44"      # White on blue.
 
-readonly GREP_COLOR_DIR="sl=${DIR_COLOR}:ms=0:mc=0:me=0"  # Blue directory, no match highlight.
-readonly GREP_COLOR_RESET="sl=0:ms=0:mc=0:me=0"           # Reset all colors.
-readonly GREP_COLOR_HIGHLIGHT="sl=${DIR_COLOR}:ms=${HIGHLIGHT_COLOR}:se=0"  # Blue directory, white-on-blue match.
+readonly GREP_COLOR_DIR="sl=${DIR_COLOR}:ms=0:mc=0:me=0:ne"
+                                        # Blue directory, no match highlight.
+readonly GREP_COLOR_RESET="sl=0:ms=0:mc=0:me=0:ne"
+                                        # Reset all colors.
+readonly GREP_COLOR_HIGHLIGHT="sl=${DIR_COLOR}:ms=${HIGHLIGHT_COLOR}:se=0:ne"
+                                        # Blue directory, white-on-blue match.
 
-# Escape special characters for safe use in shell commands (e.g., grep, find).
-safe_pattern=$(printf '%q' "$PATTERN")
+# Escape the pattern for safe use in grep -P regex matching.
+pattern_regex=$(printf '%s' "$PATTERN" | sed 's/[][\\.^$*+?{}|()]/\\&/g')
 
 # Find and colorize matching filenames, hiding permission denied errors.
 # NOTE: Use 'stdbuf -oL' to enforce line-buffered output through the pipeline.
 # This ensures results stream live.
-stdbuf -oL find . -type f -iname "*$safe_pattern*" -printf '%P\n' 2> /dev/null \
+stdbuf -oL find . -type f -iname "*$PATTERN*" -printf '%P\n' 2> /dev/null \
     | GREP_COLORS="$GREP_COLOR_DIR" \
                  stdbuf -oL grep --color=always '[^/]*$' \
     | GREP_COLORS="$GREP_COLOR_RESET" \
-                 stdbuf -oL grep --color=always -iP "$safe_pattern(?=[^/]*$)" \
+                 stdbuf -oL grep --color=always -iP "$pattern_regex(?=[^/]*$)" \
     | GREP_COLORS="$GREP_COLOR_HIGHLIGHT" \
-                 grep -Fi "$safe_pattern" --color=always
+                 grep -Fi "$PATTERN" --color=always
