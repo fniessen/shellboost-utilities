@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? ff, Time-stamp: <2025-08-02 Sat 11:58>
-#? Copyright (C) 2020-2025 Fabrice Niessen. All rights reserved.
+#? ff, Time-stamp: <2026-01-14 Wed 16:58>
+#? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -30,7 +30,7 @@ set -uo pipefail
 
 # Check if 'docopts' command is available.
 if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 "Error: 'docopts' command not found.\n"
+    printf >&2 '%s\n' "Error: 'docopts' command not found."
     exit 2
 fi
 
