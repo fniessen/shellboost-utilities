@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+OLD_DIR="PoD-Daten_20260227/input"
+NEW_DIR="PoD-Daten_20260710/input"
+
+status=0
+
+# Compare all XLS/XLSX files found in either directory.
+find "$OLD_DIR" "$NEW_DIR" \
+    -type f \( -iname '*.xlsx' -o -iname '*.xls' \) \
+    -printf '%P\n' |
+    sort -u |
+    while read -r file; do
+
+    old="$OLD_DIR/$file"
+    new="$NEW_DIR/$file"
+
+    echo "=== $file ==="
+
+    if [[ ! -f "$old" ]]; then
+        echo "Only in $NEW_DIR"
+        status=1
+        echo
+        continue
+    fi
+
+    if [[ ! -f "$new" ]]; then
+        echo "Only in $OLD_DIR"
+        status=1
+        echo
+        continue
+    fi
+
+    if diff -u \
+        <(xlsx2csv "$old") \
+        <(xlsx2csv "$new") >/dev/null
+    then
+        echo "OK"
+    else
+        echo "DIFFER"
+        diff -u \
+            <(xlsx2csv "$old") \
+            <(xlsx2csv "$new") || true
+        status=1
+    fi
+
+    echo
+done
+
+exit $status
