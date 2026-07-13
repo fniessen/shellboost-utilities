@@ -4,7 +4,7 @@ set -euo pipefail
 
 if ! command -v xlsx2csv >/dev/null 2>&1; then
     echo "Error: xlsx2csv is not installed or not in your PATH." >&2
-    echo "Install it with: pip install xlsx2csv" >&2
+    echo "Install it with: pip install --user xlsx2csv" >&2
     exit 1
 fi
 
@@ -16,15 +16,22 @@ fi
 DIR1=$1
 DIR2=$2
 
-[[ -d "$DIR1" ]] || {
+if [[ ! -d "$DIR1" ]]; then
     echo "Error: '$DIR1' is not a directory." >&2
     exit 1
-}
+fi
 
-[[ -d "$DIR2" ]] || {
+if [[ ! -d "$DIR2" ]]; then
     echo "Error: '$DIR2' is not a directory." >&2
     exit 1
-}
+fi
+
+# Use colordiff for displayed differences when available.
+if command -v colordiff >/dev/null 2>&1; then
+    DIFF_CMD=colordiff
+else
+    DIFF_CMD=diff
+fi
 
 status=0
 
@@ -56,9 +63,9 @@ while IFS= read -r file; do
         echo "Files $file1 and $file2 are identical"
     else
         echo "Files $file1 and $file2 differ"
-        diff -u \
-             <(xlsx2csv "$file1") \
-             <(xlsx2csv "$file2") || true
+        "$DIFF_CMD" -u \
+                    <(xlsx2csv "$file1") \
+                    <(xlsx2csv "$file2") || true
         status=1
     fi
 
