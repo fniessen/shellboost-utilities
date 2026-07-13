@@ -60,9 +60,9 @@ while IFS= read -r file; do
             <(xlsx2csv "$file1") \
             <(xlsx2csv "$file2") >/dev/null
     then
-        echo "Files $file1 and $file2 are identical"
+        echo "Files are identical"
     else
-        echo "Files $file1 and $file2 differ"
+        # echo "Files differ"
         "$DIFF_CMD" -u \
                     <(xlsx2csv "$file1") \
                     <(xlsx2csv "$file2") || true
