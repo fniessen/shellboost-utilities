@@ -2,47 +2,55 @@
 
 set -euo pipefail
 
-OLD_DIR="PoD-Daten_20260227/input"
-NEW_DIR="PoD-Daten_20260710/input"
+if [[ $# -ne 2 ]]; then
+    echo "Usage: $(basename "$0") DIR1 DIR2" >&2
+    exit 1
+fi
+
+DIR1=$1
+DIR2=$2
+
+[[ -d "$DIR1" ]] || { echo "Error: '$DIR1' is not a directory." >&2; exit 1; }
+[[ -d "$DIR2" ]] || { echo "Error: '$DIR2' is not a directory." >&2; exit 1; }
 
 status=0
 
 # Compare all XLS/XLSX files found in either directory.
-find "$OLD_DIR" "$NEW_DIR" \
+find "$DIR1" "$DIR2" \
     -type f \( -iname '*.xlsx' -o -iname '*.xls' \) \
     -printf '%P\n' |
     sort -u |
     while read -r file; do
 
-    old="$OLD_DIR/$file"
-    new="$NEW_DIR/$file"
+    file1="$DIR1/$file"
+    file2="$DIR2/$file"
 
     echo "=== $file ==="
 
-    if [[ ! -f "$old" ]]; then
-        echo "Only in $NEW_DIR"
+    if [[ ! -f "$file1" ]]; then
+        echo "Only in $DIR2"
         status=1
         echo
         continue
     fi
 
-    if [[ ! -f "$new" ]]; then
-        echo "Only in $OLD_DIR"
+    if [[ ! -f "$file2" ]]; then
+        echo "Only in $DIR1"
         status=1
         echo
         continue
     fi
 
     if diff -u \
-        <(xlsx2csv "$old") \
-        <(xlsx2csv "$new") >/dev/null
+        <(xlsx2csv "$file1") \
+        <(xlsx2csv "$file2") >/dev/null
     then
         echo "OK"
     else
         echo "DIFFER"
         diff -u \
-            <(xlsx2csv "$old") \
-            <(xlsx2csv "$new") || true
+            <(xlsx2csv "$file1") \
+            <(xlsx2csv "$file2") || true
         status=1
     fi
 
