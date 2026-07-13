@@ -16,18 +16,20 @@ fi
 DIR1=$1
 DIR2=$2
 
-[[ -d "$DIR1" ]] || { echo "Error: '$DIR1' is not a directory." >&2; exit 1; }
-[[ -d "$DIR2" ]] || { echo "Error: '$DIR2' is not a directory." >&2; exit 1; }
+[[ -d "$DIR1" ]] || {
+    echo "Error: '$DIR1' is not a directory." >&2
+    exit 1
+}
+
+[[ -d "$DIR2" ]] || {
+    echo "Error: '$DIR2' is not a directory." >&2
+    exit 1
+}
 
 status=0
 
 # Compare all XLS/XLSX files found in either directory.
-find "$DIR1" "$DIR2" \
-    -type f \( -iname '*.xlsx' -o -iname '*.xls' \) \
-    -printf '%P\n' |
-    sort -u |
-    while read -r file; do
-
+while IFS= read -r file; do
     file1="$DIR1/$file"
     file2="$DIR2/$file"
 
@@ -48,19 +50,24 @@ find "$DIR1" "$DIR2" \
     fi
 
     if diff -u \
-        <(xlsx2csv "$file1") \
-        <(xlsx2csv "$file2") >/dev/null
-    then
-        echo "OK"
-    else
-        echo "DIFFER"
-        diff -u \
             <(xlsx2csv "$file1") \
-            <(xlsx2csv "$file2") || true
+            <(xlsx2csv "$file2") >/dev/null
+    then
+        echo "Files $file1 and $file2 are identical"
+    else
+        echo "Files $file1 and $file2 differ"
+        diff -u \
+             <(xlsx2csv "$file1") \
+             <(xlsx2csv "$file2") || true
         status=1
     fi
 
     echo
-done
+done < <(
+    find "$DIR1" "$DIR2" \
+         -type f \( -iname '*.xlsx' -o -iname '*.xls' \) \
+         -printf '%P\n' |
+        sort -u
+)
 
-exit $status
+exit "$status"
