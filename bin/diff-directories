@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? diff-directories, Time-stamp: <2026-07-14 Tue 16:31>
+#? diff-directories, Time-stamp: <2026-07-14 Tue 17:31>
 #? Copyright (C) 2024-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -37,6 +37,19 @@ version=$(grep -E '^#\?' "$0" | cut -c 4-)
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
+# ANSI colors (only when stdout is a terminal).
+if [[ -t 1 ]]; then
+    RED=$'\e[31m'
+    GREEN=$'\e[32m'
+    BLUE=$'\e[34m'
+    RESET=$'\e[0m'
+else
+    RED=
+    GREEN=
+    BLUE=
+    RESET=
+fi
+
 # Exit on non-zero command status.
 set -e
 
@@ -64,7 +77,22 @@ fi
 # and display it.
 diff_output=$(diff $diff_opts "$DIR1" "$DIR2" 2> /dev/null)
 if [[ -n "$diff_output" ]]; then
-    printf "%s\n" "$diff_output" | sort
+    printf '%s\n' "$diff_output" | sort | while IFS= read -r line; do
+        case "$line" in
+            "Only in $DIR1:"*)
+                printf '%s%s%s\n' "$RED" "$line" "$RESET"
+                ;;
+            "Only in $DIR2:"*)
+                printf '%s%s%s\n' "$GREEN" "$line" "$RESET"
+                ;;
+            *" differ")
+                printf '%s%s%s\n' "$BLUE" "$line" "$RESET"
+                ;;
+            *)
+                printf '%s\n' "$line"
+                ;;
+        esac
+    done
 else
     printf "No differences found between directories.\n"
 fi
