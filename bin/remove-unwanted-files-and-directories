@@ -6,7 +6,7 @@
 # Define arrays for directories and file patterns.
 directories=(
     # Recycle bin.
-    "$HOME/.local/"
+    "$HOME/.local/share/Trash/"
 
     # Emacs related directories.
     "$HOME/.emacs.d/auctex-auto-generated-info/"
