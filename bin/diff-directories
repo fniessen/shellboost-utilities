@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? diff-directories, Time-stamp: <2025-08-02 Sat 12:10>
-#? Copyright (C) 2024, 2025 Fabrice Niessen. All rights reserved.
+#? diff-directories, Time-stamp: <2026-07-14 Tue 16:31>
+#? Copyright (C) 2024-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -12,9 +12,11 @@
 ##? Compare two directories recursively and display sorted differences.
 ##?
 ##? Arguments:
-##?   PATTERN                       Optional string
+##?   DIR1                          First directory
+##?   DIR2                          Second directory
 ##?
 ##? Options:
+##?   -i, --identical               Also display identical files
 ##?   -h, --help                    Display this help and exit
 ##?   -V, --version                 Display version information and exit
 
@@ -52,9 +54,15 @@ fi
 # Allow non-zero exit codes for diff.
 set +e
 
+if [[ $identical == true ]]; then
+    diff_opts="-rqs"
+else
+    diff_opts="-rq"
+fi
+
 # Perform a recursive directory comparison, suppress errors, sort the output,
 # and display it.
-diff_output=$(diff -rq "$DIR1" "$DIR2" 2> /dev/null)
+diff_output=$(diff $diff_opts "$DIR1" "$DIR2" 2> /dev/null)
 if [[ -n "$diff_output" ]]; then
     printf "%s\n" "$diff_output" | sort
 else
