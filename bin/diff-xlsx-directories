@@ -56,16 +56,20 @@ while IFS= read -r file; do
         continue
     fi
 
-    if diff -u \
-            <(xlsx2csv "$file1") \
-            <(xlsx2csv "$file2") >/dev/null
-    then
+    # Convert both Excel files to CSV for a reliable text-based comparison.
+    csv1="${file1%.*}.csv"
+    csv2="${file2%.*}.csv"
+
+    xlsx2csv "$file1" >"$csv1"
+    xlsx2csv "$file2" >"$csv2"
+
+    # Remove generated CSV files if they are identical; otherwise, keep them
+    # for inspection and display their differences.
+    if diff -u "$csv1" "$csv2" >/dev/null; then
         echo "Files are identical"
+        rm -f "$csv1" "$csv2"
     else
-        # echo "Files differ"
-        "$DIFF_CMD" -u \
-                    <(xlsx2csv "$file1") \
-                    <(xlsx2csv "$file2") || true
+        "$DIFF_CMD" -u "$csv1" "$csv2" || true
         status=1
     fi
 
