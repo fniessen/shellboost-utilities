@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? diff-directories, Time-stamp: <2026-07-14 Tue 17:31>
+#? diff-directories, Time-stamp: <2026-07-14 Tue 17:33>
 #? Copyright (C) 2024-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -16,7 +16,7 @@
 ##?   DIR2                          Second directory
 ##?
 ##? Options:
-##?   -i, --identical               Also display identical files
+##?   -s, --report-identical-files  Report when two files are the same
 ##?   -h, --help                    Display this help and exit
 ##?   -V, --version                 Display version information and exit
 
@@ -67,7 +67,7 @@ fi
 # Allow non-zero exit codes for diff.
 set +e
 
-if [[ $identical == true ]]; then
+if [[ $report_identical_files == true ]]; then
     diff_opts="-rqs"
 else
     diff_opts="-rq"
