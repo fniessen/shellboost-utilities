@@ -1,20 +1,50 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+#? diff-xlsx-directories, Time-stamp: <2026-07-27 Mon 13:07>
+#? Copyright (C) 2026 Fabrice Niessen. All rights reserved.
+#?
+#? License GPLv3+: GNU GPL version 3 or later
+#? <https://gnu.org/licenses/gpl.html>.
+#?
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
+
+##? Usage: diff-xlsx-directories [options] DIR1 DIR2
+##?
+##? Compare Excel files found in two directory trees.
+##?
+##? Arguments:
+##?   DIR1                          first directory tree
+##?   DIR2                          second directory tree
+##?
+##? Options:
+##?   -h, --help                    display this help and exit
+##?   -V, --version                 display version information and exit
+
+# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+set -uo pipefail
+
+# Check if docopts is available.
+if ! command -v docopts >/dev/null 2>&1; then
+    printf '%s\n' "Error: 'docopts' command not found." >&2
+    exit 2
+fi
+
+# Extract help and version information from the script.
+help=$(grep '^##\?' "$0" | cut -c 5-)
+version=$(grep '^#\?' "$0" | cut -c 4-)
+
+# Parse command-line arguments.
+eval "$(docopts -h "$help" -V "$version" : "$@")"
+
+# Set -e to exit on non-zero command status.
+set -e
 
 if ! command -v xlsx2csv >/dev/null 2>&1; then
     printf 'Error: xlsx2csv is not installed or not in your PATH.\n' >&2
     printf 'Install it with: pip install --user xlsx2csv\n' >&2
     exit 1
 fi
-
-if [[ $# -ne 2 ]]; then
-    printf 'Usage: %s DIR1 DIR2\n' "$(basename "$0")" >&2
-    exit 1
-fi
-
-DIR1=$1
-DIR2=$2
 
 if [[ ! -d "$DIR1" ]]; then
     printf "Error: '%s' is not a directory.\n" "$DIR1" >&2
@@ -28,9 +58,9 @@ fi
 
 # Use colordiff for displayed differences when available.
 if command -v colordiff >/dev/null 2>&1; then
-    DIFF_CMD=colordiff
+    readonly DIFF_CMD=colordiff
 else
-    DIFF_CMD=diff
+    readonly DIFF_CMD=diff
 fi
 
 status=0
