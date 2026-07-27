@@ -3,13 +3,13 @@
 set -euo pipefail
 
 if ! command -v xlsx2csv >/dev/null 2>&1; then
-    echo "Error: xlsx2csv is not installed or not in your PATH." >&2
-    echo "Install it with: pip install --user xlsx2csv" >&2
+    printf 'Error: xlsx2csv is not installed or not in your PATH.\n' >&2
+    printf 'Install it with: pip install --user xlsx2csv\n' >&2
     exit 1
 fi
 
 if [[ $# -ne 2 ]]; then
-    echo "Usage: $(basename "$0") DIR1 DIR2" >&2
+    printf 'Usage: %s DIR1 DIR2\n' "$(basename "$0")" >&2
     exit 1
 fi
 
@@ -17,12 +17,12 @@ DIR1=$1
 DIR2=$2
 
 if [[ ! -d "$DIR1" ]]; then
-    echo "Error: '$DIR1' is not a directory." >&2
+    printf "Error: '%s' is not a directory.\n" "$DIR1" >&2
     exit 1
 fi
 
 if [[ ! -d "$DIR2" ]]; then
-    echo "Error: '$DIR2' is not a directory." >&2
+    printf "Error: '%s' is not a directory.\n" "$DIR2" >&2
     exit 1
 fi
 
@@ -40,19 +40,19 @@ while IFS= read -r file; do
     file1="$DIR1/$file"
     file2="$DIR2/$file"
 
-    echo "=== $file ==="
+    printf '=== %s ===\n' "$file"
 
     if [[ ! -f "$file1" ]]; then
-        echo "Only in $DIR2"
+        printf 'Only in %s\n' "$DIR2"
+        printf '\n'
         status=1
-        echo
         continue
     fi
 
     if [[ ! -f "$file2" ]]; then
-        echo "Only in $DIR1"
+        printf 'Only in %s\n' "$DIR1"
+        printf '\n'
         status=1
-        echo
         continue
     fi
 
@@ -66,14 +66,14 @@ while IFS= read -r file; do
     # Remove generated CSV files if they are identical; otherwise, keep them
     # for inspection and display their differences.
     if diff -u "$csv1" "$csv2" >/dev/null; then
-        echo "Files are identical"
+        printf 'Files are identical\n'
         rm -f "$csv1" "$csv2"
     else
         "$DIFF_CMD" -u "$csv1" "$csv2" || true
         status=1
     fi
 
-    echo
+    printf '\n'
 done < <(
     find "$DIR1" "$DIR2" \
          -type f \( -iname '*.xlsx' -o -iname '*.xls' \) \
