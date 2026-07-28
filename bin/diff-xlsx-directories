@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? diff-xlsx-directories, Time-stamp: <2026-07-28 Tue 16:42>
+#? diff-xlsx-directories, Time-stamp: <2026-07-28 Tue 16:52>
 #? Copyright (C) 2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later
@@ -56,13 +56,6 @@ if [[ ! -d "$DIR2" ]]; then
     exit 1
 fi
 
-# Use colordiff for displayed differences when available.
-if command -v colordiff >/dev/null 2>&1; then
-    readonly DIFF_CMD=colordiff
-else
-    readonly DIFF_CMD=diff
-fi
-
 status=0
 
 # Compare all XLS/XLSX files found in either directory.
@@ -90,30 +83,52 @@ while IFS= read -r file; do
     csv1="${file1%.*}.csv"
     csv2="${file2%.*}.csv"
 
-    xlsx2csv "$file1" >"$csv1"
-    xlsx2csv "$file2" >"$csv2"
-
+    # Always remove the generated CSV files when this iteration completes.
     cleanup_csv() {
         rm -f -- "$csv1" "$csv2"
     }
 
-    trap cleanup_csv RETURN
+    xlsx2csv "$file1" >"$csv1"
+    xlsx2csv "$file2" >"$csv2"
 
-    if diff -u "$csv1" "$csv2" >/dev/null; then
-        printf 'Files are identical\n'
-    else
-        "$DIFF_CMD" -u "$csv1" "$csv2" || true
-        status=1
-    fi
+    # Avoid exiting immediately when git diff reports differences.
+    set +e
 
-    trap - RETURN
+    git diff --no-index \
+        --color=always \
+        --word-diff=color \
+        --word-diff-regex='[^,]+' \
+        --src-prefix="$DIR1/" \
+        --dst-prefix="$DIR2/" \
+        -- \
+        <(sed 's/,/, /g; s/\r$//' "$csv1") \
+        <(sed 's/,/, /g; s/\r$//' "$csv2") \
+        | tail -n +4
+
+    diff_status=$?
+
+    set -e
+
+    case "$diff_status" in
+        0)
+            printf 'Files are identical\n'
+            ;;
+        1)
+            status=1
+            ;;
+        *)
+            printf 'Error while comparing %s.\n' "$file" >&2
+            cleanup_csv
+            exit "$diff_status"
+            ;;
+    esac
+
     cleanup_csv
-
     printf '\n'
 done < <(
     find "$DIR1" "$DIR2" \
-         -type f \( -iname '*.xlsx' -o -iname '*.xls' \) \
-         -printf '%P\n' |
+        -type f \( -iname '*.xlsx' -o -iname '*.xls' \) \
+        -printf '%P\n' |
         sort -u
 )
 
