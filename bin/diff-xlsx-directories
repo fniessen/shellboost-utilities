@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? diff-xlsx-directories, Time-stamp: <2026-07-28 Tue 16:52>
+#? diff-xlsx-directories, Time-stamp: <2026-08-10 Mon 12:56>
 #? Copyright (C) 2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later
@@ -21,14 +21,28 @@
 ##?   -h, --help                    display this help and exit
 ##?   -V, --version                 display version information and exit
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
-# Check if docopts is available.
-if ! command -v docopts >/dev/null 2>&1; then
-    printf '%s\n' "Error: 'docopts' command not found." >&2
-    exit 2
-fi
+# BSD sysexits(3) exit codes.
+readonly EX_OK=0
+readonly EX_USAGE=64
+readonly EX_DATAERR=65
+readonly EX_NOINPUT=66
+readonly EX_UNAVAILABLE=69
+readonly EX_SOFTWARE=70
+readonly EX_CANTCREAT=73
+readonly EX_IOERR=74
+readonly EX_NOPERM=77
+readonly EX_CONFIG=78
+
+# Check if required commands are available.
+for cmd in docopts xlsx2csv; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf '%s\n' "${0##*/}: command not found: $cmd" >&2
+        exit $EX_UNAVAILABLE
+    fi
+done
 
 # Extract help and version information from the script.
 help=$(grep '^##[?]' "$0" | cut -c 5-)
@@ -37,23 +51,17 @@ version=$(grep '^#[?]' "$0" | cut -c 4-)
 # Parse command-line arguments.
 eval "$(docopts -h "$help" -V "$version" : "$@")"
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
-
-if ! command -v xlsx2csv >/dev/null 2>&1; then
-    printf 'Error: xlsx2csv is not installed or not in your PATH.\n' >&2
-    printf 'Install it with: pip install --user xlsx2csv\n' >&2
-    exit 1
-fi
 
 if [[ ! -d "$DIR1" ]]; then
     printf "Error: '%s' is not a directory.\n" "$DIR1" >&2
-    exit 1
+    exit $EX_NOINPUT
 fi
 
 if [[ ! -d "$DIR2" ]]; then
     printf "Error: '%s' is not a directory.\n" "$DIR2" >&2
-    exit 1
+    exit $EX_NOINPUT
 fi
 
 status=0
@@ -91,7 +99,7 @@ while IFS= read -r file; do
     xlsx2csv "$file1" >"$csv1"
     xlsx2csv "$file2" >"$csv2"
 
-    # Avoid exiting immediately when git diff reports differences.
+    # Temporarily disable fail-fast error handling.
     set +e
 
     git diff --no-index \
@@ -107,6 +115,7 @@ while IFS= read -r file; do
 
     diff_status=$?
 
+    # Re-enable fail-fast error handling.
     set -e
 
     case "$diff_status" in
