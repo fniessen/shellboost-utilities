@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? uncolor, Time-stamp: <2026-08-10 Mon 11:45>
+#? uncolor, Time-stamp: <2026-08-10 Mon 12:21>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -19,38 +19,61 @@
 ##?   -V, --version                 display version information and exit
 
 # NOTE:
-# This script removes ANSI color and control sequences from input. For more
-# advanced handling (e.g. better Unicode/terminal sequence support), consider
-# using the external tool 'ansi2text' from the 'aha' or 'ansi2txt' packages.
+# This script removes ANSI color and control sequences from text streams.
+# For more advanced handling (e.g. Unicode-aware processing or broader
+# terminal escape-sequence support), consider using 'ansi2txt' or 'aha'.
 
 # Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
+# BSD sysexits(3) exit codes.
+readonly EX_OK=0
+readonly EX_USAGE=64
+readonly EX_DATAERR=65
+readonly EX_NOINPUT=66
+readonly EX_UNAVAILABLE=69
+readonly EX_SOFTWARE=70
+readonly EX_CANTCREAT=73
+readonly EX_IOERR=74
+readonly EX_NOPERM=77
+readonly EX_CONFIG=78
+
 # Check if 'docopts' command is available.
 if ! command -v docopts >/dev/null 2>&1; then
     printf '%s\n' "${0##*/}: command not found: docopts" >&2
-    exit 2
+    exit "$EX_UNAVAILABLE"
 fi
 
 # Extract help and version information from the script.
 help=$(grep '^##[?]' "$0" | cut -c 5-)
 version=$(grep '^#[?]' "$0" | cut -c 4-)
 
-# Parse command-line arguments using docopts.
-eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
+case "${1:-}" in
+    -h|--help)
+        printf '%s\n' "$help"
+        exit "$EX_OK"
+        ;;
+    -V|--version)
+        printf '%s\n' "$version"
+        exit "$EX_OK"
+        ;;
+esac
 
-# Silence AI false positives: FILE is set dynamically by docopts.
-FILE="${FILE:-}"
+FILE="${1:-}"
 
 # Exit on command failures.
 set -e
 
-if [[ -n "${FILE}" ]]; then
+readonly ANSI_ESCAPE_REGEX=$'s_\033\\[[0-9;?<>=]*[[:alpha:]]__g'
+
+if [[ -n "$FILE" ]]; then
     if [[ ! -f "$FILE" || ! -r "$FILE" ]]; then
-        printf "Error: File '%s' does not exist, is not readable, or is not a regular file.\n" "$FILE" >&2
-        exit 2
+        printf '%s: cannot read file: %s\n' "${0##*/}" "$FILE" >&2
+        exit "$EX_NOINPUT"
     fi
-    sed -E $'s_\033\\[[0-9;?<>=]*[a-zA-Z]__g' "$FILE"
+    sed -E "${ANSI_ESCAPE_REGEX}" "$FILE"
 else
-    sed -E $'s_\033\\[[0-9;?<>=]*[a-zA-Z]__g'
+    sed -E "${ANSI_ESCAPE_REGEX}"
 fi
+
+exit "$EX_OK"
