@@ -6,7 +6,7 @@
 #+LANGUAGE:  en
 
 #+PROPERTY:  header-args :eval no
-#+SETUPFILE: ~/org/theme-readtheorg.setup
+#+SETUPFILE: ~/org/setup/html-theme-readtheorg.setup
 
 #+name: current-time
 #+begin_src emacs-lisp :eval yes :results value :tangle no
@@ -138,13 +138,13 @@ alias file_ext=$'find . -type f -name "*.*" | awk -F. \'!a[$NF]++{print $NF}\''
 Recursive version:
 
 #+begin_src shell
-find . -type f | sed -e 's/.*\.//' | sed -e 's/.*\///' | sort -u
+find . -type f | sed -e 's_.*\.__' | sed -e 's_.*\/__' | sort -u
 #+end_src
 
 If you want totals (how may times the extension was seen):
 
 #+begin_src shell
-find . -type f | sed -e 's/.*\.//' | sed -e 's/.*\///' | sort | uniq -c | sort -rn
+find . -type f | sed -e 's_.*\.__' | sed -e 's_.*\/__' | sort | uniq -c | sort -rn
 #+end_src
 
 Non-recursive (single folder):
@@ -175,7 +175,7 @@ find . -type f -iname "*$1*" -printf '%P\n'
 Alternatively, if piping commands, avoid *buffered output* by applying ~stdbuf -oL~
 to ~find~ (force flushing of output).
 
-: stdbuf -oL find . -type f -iname "*$1*" -print | sed "s#\./##"
+: stdbuf -oL find . -type f -iname "*$1*" -print | sed "s_\./__"
 
 The buffering is on the output side of the pipe, not the input side.
 
@@ -548,21 +548,21 @@ file =from-this.txt= to file =exclude-these.txt=.  /(This command also removes t
 diff formatting after it gets the right lines.)/
 
 #+begin_src shell
-colordiff -U $(wc -l < from-this.txt) from-this.txt exclude-these.txt | sed -n 's/^-//p'
+colordiff -U $(wc -l < from-this.txt) from-this.txt exclude-these.txt | sed -n 's_^-__p'
 #+end_src
 
 Example:
 
 #+begin_src shell
 awk 'NR == FNR { a[$0]++; next } { if (! a[$0]) print }' dupes-standard.txt dupes-custo.txt
-colordiff -U $(wc -l < dupes-custo.txt) dupes-custo.txt dupes-standard.txt | sed -n 's/^-//p'
+colordiff -U $(wc -l < dupes-custo.txt) dupes-custo.txt dupes-standard.txt | sed -n 's_^-__p'
 #+end_src
 
 * Recursively run chmod -x?
 
 ** Convert the files with 755 permissions to 644
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 find . -type f -perm 755 -exec chmod 644 {} \;
 #+end_src
 
