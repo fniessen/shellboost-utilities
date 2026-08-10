@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-#? find-big-files, Time-stamp: <2026-08-10 Mon 09:29>
+#? find-large-directories, Time-stamp: <2026-08-10 Mon 09:32>
 #? Copyright (C) 2023-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
-##? Usage: find-big-files [options]
+##? Usage: find-large-directories [options]
 ##?
-##? Find big files.
+##? Find big directories (≥ 100 MB).
 ##?
 ##? Options:
 ##?   -h, --help                    display this help and exit
@@ -34,14 +34,29 @@ eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 # Set -e to exit on non-zero command status.
 set -e
 
-# Minimum file size in MB.
-MIN_SIZE=50
+# Minimum directory size in MB.
+MIN_SIZE=100
 
-# Find all files that are larger than the minimum size, sort by size in descending order.
-find . -type f -size +${MIN_SIZE}M -readable -exec ls -lh {} + 2>/dev/null \
-    | awk '{ print $5, $NF }' \
-    | sort -rh -k1,1 \
-    | awk '{ print $1, $2 }'
+# Level-1 directories only, size in MB, filter >= MIN_SIZE, sort desc, top 10.
+du -m --max-depth=1 . \
+    | awk -v min="${MIN_SIZE}" '
+        {
+            size_mb = $1
+            path    = $2
+
+            if (size_mb >= min) {
+                if (size_mb >= 1024) {
+                    # Display in GiB with one decimal
+                    printf "%.1fG\t%s\n", size_mb / 1024, path
+                } else {
+                    # Display in MiB
+                    printf "%dM\t%s\n", size_mb, path
+                }
+            }
+        }
+    ' \
+        | sort -rh -k1,1 \
+        | head -n 10
 
 # Exit with a success code.
 exit 0
