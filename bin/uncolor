@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? uncolor, Time-stamp: <2025-08-07 Thu 13:40>
-#? Copyright (C) 2020-2025 Fabrice Niessen. All rights reserved.
+#? uncolor, Time-stamp: <2026-08-10 Mon 11:45>
+#? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -23,18 +23,18 @@
 # advanced handling (e.g. better Unicode/terminal sequence support), consider
 # using the external tool 'ansi2text' from the 'aha' or 'ansi2txt' packages.
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 # Check if 'docopts' command is available.
-if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 "Error: 'docopts' command not found.\n"
+if ! command -v docopts >/dev/null 2>&1; then
+    printf '%s\n' "${0##*/}: command not found: docopts" >&2
     exit 2
 fi
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
@@ -42,15 +42,15 @@ eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 # Silence AI false positives: FILE is set dynamically by docopts.
 FILE="${FILE:-}"
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 if [[ -n "${FILE}" ]]; then
     if [[ ! -f "$FILE" || ! -r "$FILE" ]]; then
-        printf >&2 "Error: File '%s' does not exist, is not readable, or is not a regular file.\n" "$FILE"
+        printf "Error: File '%s' does not exist, is not readable, or is not a regular file.\n" "$FILE" >&2
         exit 2
     fi
-    sed -E $'s/\033\\[[0-9;?<>=]*[a-zA-Z]//g' "$FILE"
+    sed -E $'s_\033\\[[0-9;?<>=]*[a-zA-Z]__g' "$FILE"
 else
-    sed -E $'s/\033\\[[0-9;?<>=]*[a-zA-Z]//g'
+    sed -E $'s_\033\\[[0-9;?<>=]*[a-zA-Z]__g'
 fi
