@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 
-#? diff-directories, Time-stamp: <2026-07-14 Tue 17:33>
+#? diff-directories, Time-stamp: <2026-07-27 Mon 13:37>
 #? Copyright (C) 2024-2026 Fabrice Niessen. All rights reserved.
 #?
-#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? License GPLv3+: GNU GPL version 3 or later
+#?<https://gnu.org/licenses/gpl.html>.
+#?
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
 ##? Usage: diff-directories [options] DIR1 DIR2
 ##?
-##? Compare two directories recursively and display sorted differences.
+##? Compare two directory trees recursively and display sorted differences.
 ##?
 ##? Arguments:
-##?   DIR1                          First directory
-##?   DIR2                          Second directory
+##?   DIR1                          First directory tree
+##?   DIR2                          Second directory tree
 ##?
 ##? Options:
 ##?   -s, --report-identical-files  Report when two files are the same
@@ -31,8 +33,8 @@ if ! command -v docopts > /dev/null 2>&1; then
 fi
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
