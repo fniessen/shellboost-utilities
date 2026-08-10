@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? bak, Time-stamp: <2025-08-07 Thu 11:46>
-#? Copyright (C) 2020-2025 Fabrice Niessen. All rights reserved.
+#? bak, Time-stamp: <2026-08-10 Mon 10:45>
+#? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -23,38 +23,42 @@
 ##?   bak core/main.c
 ##?   bak -r core/main.c
 
-# BSD sysexits.h exit codes.
-EX_OK=0                          # Success.
-EX_DATAERR=65                    # Input data error (e.g., file comparison
-                                 # failed).
-EX_NOINPUT=66                    # Cannot open input.
-EX_UNAVAILABLE=69                # Service unavailable (e.g., missing command).
-EX_OSERR=71                      # System error (e.g., file operation failed).
-EX_CANTCREAT=73                  # Output file creation skipped (e.g., user
-                                 # declined overwrite or files identical).
-
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
-# Define color and formatting variables using ANSI escape codes.
-RESET=$'\e[0m'
-BOLD=$'\e[1m'
-GREEN=$'\e[32m'
-RED=$'\e[31m'
-YELLOW=$'\e[33m'
-WHITE=$'\e[37m'
-BGRED=$'\e[41m'
-ERROR="${BOLD}${WHITE}${BGRED}"
+# BSD sysexits(3) exit codes.
+readonly EX_OK=0
+readonly EX_USAGE=64
+readonly EX_DATAERR=65
+readonly EX_NOINPUT=66
+readonly EX_UNAVAILABLE=69
+readonly EX_SOFTWARE=70
+readonly EX_CANTCREAT=73
+readonly EX_IOERR=74
+readonly EX_NOPERM=77
+readonly EX_CONFIG=78
+
+# ANSI escape sequences.
+readonly RESET=$'\e[0m'
+readonly BOLD=$'\e[1m'
+readonly GREEN=$'\e[32m'
+readonly RED=$'\e[31m'
+readonly YELLOW=$'\e[33m'
+readonly WHITE=$'\e[37m'
+readonly BGRED=$'\e[41m'
+
+# Composite styles.
+readonly ERROR="${BOLD}${WHITE}${BGRED}"
 
 # Check if 'colordiff' is installed, and use it for colorized output, fallback
 # to 'diff'.
 diff_cmd="diff"
-if command -v colordiff > /dev/null 2>&1; then
+if command -v colordiff >/dev/null 2>&1; then
     diff_cmd="colordiff"
 fi
 
-# Define function to check if a file exists, compare it, show differences if necessary,
-# and prompt the user for overwrite.
+# Define function to check if a file exists, compare it, show differences if
+# necessary, and prompt the user for overwrite.
 confirm_overwrite_or_skip() {
     local source_file="$1"
     local backup_file="$2"
@@ -79,15 +83,17 @@ confirm_overwrite_or_skip() {
     return $EX_OK
 }
 
-# Check if 'docopts' command is available.
-if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 "${ERROR}ERROR: 'docopts' command not found.${RESET}\n"
-    exit $EX_UNAVAILABLE                # Service unavailable.
-fi
+# Check if required commands are available.
+for cmd in docopts; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf '%s\n' "${0##*/}: command not found: $cmd" >&2
+        exit $EX_UNAVAILABLE
+    fi
+done
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
@@ -117,19 +123,19 @@ new_file="$(dirname -- "$FILE")/$basename$BAK_EXTENSION$extension"
 
 # Check if file exists and is a regular file.
 if [[ ! -f "$FILE" ]]; then
-    printf >&2 "ERROR: Argument must be a regular file that exists.\n"
+    printf "ERROR: Argument must be a regular file that exists.\n" >&2
     exit $EX_NOINPUT
 fi
 
 # Copy or rename the file depending on the options used.
 if [[ "$rename" == "true" ]]; then
     if confirm_overwrite_or_skip "$FILE" "$new_file"; then
-        mv "$FILE" "$new_file" || exit $EX_OSERR
+        mv "$FILE" "$new_file" || exit $EX_IOERR
         printf "File renamed from ${BOLD}$FILE${RESET} to ${BOLD}$new_file${RESET}.\n"
     fi
 else
     if confirm_overwrite_or_skip "$FILE" "$new_file"; then
-        cp "$FILE" "$new_file" || exit $EX_OSERR
+        cp "$FILE" "$new_file" || exit $EX_IOERR
         printf "File copied from ${GREEN}${BOLD}$FILE${RESET} to ${RED}${BOLD}$new_file${RESET}.\n"
     fi
 fi
