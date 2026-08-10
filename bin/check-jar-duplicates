@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? check-jar-duplicates, Time-stamp: <2025-08-02 Sat 12:09>
-#? Copyright (C) 2024, 2025 Fabrice Niessen. All rights reserved.
+#? check-jar-duplicates, Time-stamp: <2026-01-11 Sun 12:10>
+#? Copyright (C) 2024-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -25,8 +25,8 @@ if ! command -v docopts > /dev/null 2>&1; then
 fi
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
@@ -46,7 +46,7 @@ tempfile=$(mktemp)
 # Extract base filenames and store them with their full paths.
 for jar in $jar_list; do
     # Extract the base name by removing version numbers, suffixes, and extensions.
-    base_name=$(basename "$jar" | sed -E 's/([-_.0-9]+|[Ff]inal|[Rr][Cc][0-9]*)+\.jar$//')
+    base_name=$(basename "$jar" | sed -E 's_([-_.0-9]+|[Ff]inal|[Rr][Cc][0-9]*)+\.jar$__')
     printf "%s %s\n" "$base_name" "$jar" >> "$tempfile"
 done
 
