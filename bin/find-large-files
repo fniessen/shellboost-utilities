@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? find-large-files, Time-stamp: <2026-08-10 Mon 09:32>
+#? find-large-files, Time-stamp: <2026-08-10 Mon 11:33>
 #? Copyright (C) 2023-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -9,18 +9,18 @@
 
 ##? Usage: find-large-files [options]
 ##?
-##? Find big files.
+##? Find large files.
 ##?
 ##? Options:
 ##?   -h, --help                    display this help and exit
 ##?   -V, --version                 display version information and exit
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 # Check if 'docopts' command is available.
 if ! command -v docopts >/dev/null 2>&1; then
-    printf >&2 "Error: 'docopts' command not found.\n"
+    printf '%s\n' "${0##*/}: command not found: docopts" >&2
     exit 2
 fi
 
@@ -37,11 +37,15 @@ set -e
 # Minimum file size in MB.
 MIN_SIZE=50
 
-# Find all files that are larger than the minimum size, sort by size in descending order.
-find . -type f -size +${MIN_SIZE}M -readable -exec ls -lh {} + 2>/dev/null \
-    | awk '{ print $5, $NF }' \
-    | sort -rh -k1,1 \
-    | awk '{ print $1, $2 }'
+# Find all files that are larger than the minimum size, sort by size in
+# descending order.
+find . -type f -size +"${MIN_SIZE}"M -readable -printf '%s\t%p\n' 2>/dev/null \
+    | sort -nr -k1,1 \
+    | while IFS=$'\t' read -r size file; do
+          printf '%8s  %s\n' \
+                 "$(numfmt --to=iec-i --suffix=B "$size")" \
+                 "${file#./}"
+      done
 
 # Exit with a success code.
 exit 0
