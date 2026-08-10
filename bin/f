@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? f, Time-stamp: <2025-02-06 Thu 10:19>
-#? Copyright (C) 2020-2024 Fabrice Niessen. All rights reserved.
+#? f, Time-stamp: <2026-08-10 Mon 10:31>
+#? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -11,8 +11,8 @@
 ##?
 ##? Find directories or files matching a string and print their full file name.
 ##?
-##? Note:
-##?   Permission denied errors are suppressed using '2> /dev/null'.
+##? NOTE:
+##?   Permission denied errors are suppressed using '2>/dev/null'.
 ##?
 ##? Arguments:
 ##?   PATTERN                       optional string
@@ -25,31 +25,47 @@
 ##?   f                             list all directories and files
 ##?   f doc                         list directories or files matching doc in their name
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
-# Check if 'docopts' command is available.
-if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 "Error: 'docopts' command not found.\n"
-    exit 2
-fi
+# BSD sysexits(3) exit codes.
+readonly EX_OK=0
+readonly EX_USAGE=64
+readonly EX_DATAERR=65
+readonly EX_NOINPUT=66
+readonly EX_UNAVAILABLE=69
+readonly EX_SOFTWARE=70
+readonly EX_CANTCREAT=73
+readonly EX_IOERR=74
+readonly EX_NOPERM=77
+readonly EX_CONFIG=78
+
+# ANSI escape sequences.
+readonly RESET=$'\e[0m'
+readonly BOLD=$'\e[1m'
+readonly GREEN=$'\e[32m'
+readonly RED=$'\e[31m'
+readonly YELLOW=$'\e[33m'
+readonly WHITE=$'\e[37m'
+readonly BGRED=$'\e[41m'
+
+# Composite styles.
+readonly ERROR="${BOLD}${WHITE}${BGRED}"
+
+# Check if required commands are available.
+for cmd in docopts fd ff; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf '%s\n' "${0##*/}: command not found: $cmd" >&2
+        exit $EX_UNAVAILABLE
+    fi
+done
 
 # Extract help and version information from the script.
-help=$(grep "^##?" "$0" | cut -c 5-)
-version=$(grep "^#?" "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
-args="$(docopts -h "$help" -V "$version" : "$@")"
-eval "$args"
-
-# Set -e to exit on non-zero command status.
-set -e
-
-# Set color codes for formatting.
-readonly MATCH_COLOR="1;37;1;44"        # White text on blue background.
-
-# Disable -e for the find commands.
-set +e
+eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
 # Find and colorize matching directory or file names, hiding permission denied
 # errors.
@@ -57,4 +73,4 @@ fd "$PATTERN"
 ff "$PATTERN"
 
 # Exit with a success code.
-exit 0
+exit $EX_OK
