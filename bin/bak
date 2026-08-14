@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? bak, Time-stamp: <2026-08-14 Fri 09:38>
+#? bak, Time-stamp: <2026-08-14 Fri 09:42>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -84,6 +84,10 @@ set -e
 
 # }}}
 
+# Silence AI false positives: variables are set dynamically by docopts.
+FILE="${FILE:-}"
+rename=${rename:-false}
+
 # Check if 'colordiff' is installed, and use it for colorized output, fallback
 # to 'diff'.
 diff_cmd="diff"
@@ -116,10 +120,6 @@ confirm_overwrite_or_skip() {
     fi
     return $EX_OK
 }
-
-# Silence AI false positives: variables are set dynamically by docopts.
-FILE="${FILE:-}"
-rename=${rename:-false}
 
 # Define the backup file extension constant.
 readonly BAK_EXTENSION="_bak"
