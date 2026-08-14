@@ -40,24 +40,24 @@ installed on your system:
 
 The following *BSD-style exit codes* are used throughout the scripts:
 
-| Code | Name           | Meaning                              | Usage condition                                                                                                                                |
-|------+----------------+--------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------|
-|    0 | EX_OK          |                                      |                                                                                                                                                |
-|   64 | EX_USAGE       | Command-line usage error             | Command misuse, bad input, invalid arguments, No file specified                                                                                |
-|   65 | EX_DATAERR     | Input data error / Data format error | Bad input data (doesn't exist); File empty, File too large                                                                                     |
-|   66 | EX_NOINPUT     | Cannot open input                    | Missing file, File not found                                                                                                                   |
-|   67 | EX_NOUSER      | User unknown                         |                                                                                                                                                |
-|   68 | EX_NOHOST      | Host unknown                         |                                                                                                                                                |
-|   69 | EX_UNAVAILABLE | Service unavailable                  | A required external resource, service, or dependency (like ~docopts~) is missing / not available; Command not found, cannot detect shell context |
-|   70 | EX_SOFTWARE    | Internal software error              | Bug or fault in the script's logic itself                                                                                                      |
-|   71 | EX_OSERR       | System error (e.g. can't fork)       | Most ~cp~ / ~mv~ failures, as they typically reflect OS-level problems; can't ~cd~                                                                   |
-|   72 | EX_OSFILE      | Critical OS file missing             |                                                                                                                                                |
-|   73 | EX_CANTCREAT   | Can't create output file             |                                                                                                                                                |
-|   74 | EX_IOERR       | I/O error                            |                                                                                                                                                |
-|   75 | EX_TEMPFAIL    | Temporary failure (retry later)      | Temp file creation                                                                                                                             |
-|   76 | EX_PROTOCOL    | Remote protocol error                |                                                                                                                                                |
-|   77 | EX_NOPERM      | Permission denied                    |                                                                                                                                                |
-|   78 | EX_CONFIG      | Configuration error                  | Missing environment variables                                                                                                                  |
+| Code | Name           | Meaning                   | Usage condition                                            |
+|------+----------------+---------------------------+------------------------------------------------------------|
+|    0 | *EX_OK*        | Successful termination    | Command completed successfully                             |
+|   64 | *EX_USAGE*     | Command-line usage error  | Invalid arguments, bad options, missing required arguments |
+|   65 | *EX_DATAERR*   | Input data error          | Invalid file contents, parse errors, malformed data        |
+|   66 | *EX_NOINPUT*   | Cannot open input         | Input file missing, file not found, unreadable input       |
+|   67 | EX_NOUSER      | User unknown              |                                                            |
+|   68 | EX_NOHOST      | Host unknown              |                                                            |
+|   69 | *EX_UNAVAILABLE* | Service unavailable       | Missing dependency, command not found, feature unavailable |
+|   70 | *EX_SOFTWARE*  | Internal software error   | Bug, unexpected condition, logic failure                   |
+|   71 | EX_OSERR       | Operating system error    | Failure of a system call or OS service                     |
+|   72 | EX_OSFILE      | Critical OS file missing  |                                                            |
+|   73 | *EX_CANTCREAT* | Can't create output file  | Cannot create or overwrite the destination file            |
+|   74 | *EX_IOERR*     | I/O error                 | Read/write failure during file operations                  |
+|   75 | EX_TEMPFAIL    | Temporary failure         | Transient failure; retry may succeed later                 |
+|   76 | EX_PROTOCOL    | Remote protocol error     |                                                            |
+|   77 | *EX_NOPERM*    | Permission denied         | Insufficient privileges, access denied                     |
+|   78 | *EX_CONFIG*    | Configuration error       | Missing or invalid environment variables or configuration  |
 
 * Color coding for file changes
 
