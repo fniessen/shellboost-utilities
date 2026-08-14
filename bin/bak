@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? bak, Time-stamp: <2026-08-10 Mon 10:45>
+#? bak, Time-stamp: <2026-08-10 Mon 11:57>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -38,14 +38,24 @@ readonly EX_IOERR=74
 readonly EX_NOPERM=77
 readonly EX_CONFIG=78
 
-# ANSI escape sequences.
-readonly RESET=$'\e[0m'
-readonly BOLD=$'\e[1m'
-readonly GREEN=$'\e[32m'
-readonly RED=$'\e[31m'
-readonly YELLOW=$'\e[33m'
-readonly WHITE=$'\e[37m'
-readonly BGRED=$'\e[41m'
+# ANSI escape sequences (enabled only when output is a terminal).
+if [[ -t 1 && "${NO_COLOR:-}" != "1" ]]; then
+    readonly RESET=$'\e[0m'
+    readonly BOLD=$'\e[1m'
+    readonly GREEN=$'\e[32m'
+    readonly RED=$'\e[31m'
+    readonly YELLOW=$'\e[33m'
+    readonly WHITE=$'\e[37m'
+    readonly BGRED=$'\e[41m'
+else
+    readonly RESET=''
+    readonly BOLD=''
+    readonly GREEN=''
+    readonly RED=''
+    readonly YELLOW=''
+    readonly WHITE=''
+    readonly BGRED=''
+fi
 
 # Composite styles.
 readonly ERROR="${BOLD}${WHITE}${BGRED}"
@@ -103,7 +113,7 @@ eval "$docopts_output"
 FILE="${FILE:-}"
 rename=${rename:-false}
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 # Define the backup file extension constant.
