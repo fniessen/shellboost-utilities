@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? bak, Time-stamp: <2026-08-10 Mon 11:57>
+#? bak, Time-stamp: <2026-08-14 Fri 09:38>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -22,6 +22,8 @@
 ##? Examples:
 ##?   bak core/main.c
 ##?   bak -r core/main.c
+
+# {{{ Boilerplate
 
 # Exit on undefined variables and pipeline errors.
 set -uo pipefail
@@ -59,6 +61,28 @@ fi
 
 # Composite styles.
 readonly ERROR="${BOLD}${WHITE}${BGRED}"
+readonly WARNING="${BOLD}${YELLOW}"
+
+# Check if required commands are available.
+for cmd in docopts; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf '%s\n' "${0##*/}: command not found: $cmd" >&2
+        exit $EX_UNAVAILABLE
+    fi
+done
+
+# Extract help and version information from the script.
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
+
+# Parse command-line arguments using docopts.
+docopts_output=$(docopts -h "$help" -V "$version" : "$@") || exit $?
+eval "$docopts_output"
+
+# Exit on command failures.
+set -e
+
+# }}}
 
 # Check if 'colordiff' is installed, and use it for colorized output, fallback
 # to 'diff'.
@@ -93,28 +117,9 @@ confirm_overwrite_or_skip() {
     return $EX_OK
 }
 
-# Check if required commands are available.
-for cmd in docopts; do
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-        printf '%s\n' "${0##*/}: command not found: $cmd" >&2
-        exit $EX_UNAVAILABLE
-    fi
-done
-
-# Extract help and version information from the script.
-help=$(grep '^##[?]' "$0" | cut -c 5-)
-version=$(grep '^#[?]' "$0" | cut -c 4-)
-
-# Parse command-line arguments using docopts.
-docopts_output=$(docopts -h "$help" -V "$version" : "$@") || exit $?
-eval "$docopts_output"
-
 # Silence AI false positives: variables are set dynamically by docopts.
 FILE="${FILE:-}"
 rename=${rename:-false}
-
-# Exit on command failures.
-set -e
 
 # Define the backup file extension constant.
 readonly BAK_EXTENSION="_bak"
