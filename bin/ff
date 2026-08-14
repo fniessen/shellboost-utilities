@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? ff, Time-stamp: <2026-08-14 Fri 11:09>
+#? ff, Time-stamp: <2026-08-14 Fri 16:18>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -24,6 +24,8 @@
 ##? Examples:
 ##?   ff                            list all files
 ##?   ff admin                      list files matching admin in their name
+
+# {{{ Boilerplate
 
 # Exit on undefined variables and pipeline errors.
 set -uo pipefail
@@ -84,6 +86,8 @@ PATTERN="${PATTERN:-}"
 
 # Exit on command failures.
 set -e
+
+# }}}
 
 # Color configuration. The 'ne' flag prevents grep from emitting erase-line ANSI
 # sequences.
