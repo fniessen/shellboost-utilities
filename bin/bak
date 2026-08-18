@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? bak, Time-stamp: <2026-08-14 Fri 09:42>
+#? bak, Time-stamp: <2026-08-18 Tue 09:44>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -40,28 +40,36 @@ readonly EX_IOERR=74
 readonly EX_NOPERM=77
 readonly EX_CONFIG=78
 
-# ANSI escape sequences (enabled only when output is a terminal).
+# Terminal colours and attributes.
+# Disabled for non-interactive output and NO_COLOR=1.
 if [[ -t 1 && "${NO_COLOR:-}" != "1" ]]; then
-    readonly RESET=$'\e[0m'
-    readonly BOLD=$'\e[1m'
-    readonly GREEN=$'\e[32m'
-    readonly RED=$'\e[31m'
-    readonly YELLOW=$'\e[33m'
-    readonly WHITE=$'\e[37m'
-    readonly BGRED=$'\e[41m'
+    readonly RESET="$(tput sgr0 2>/dev/null || printf '\033[0m')"
+    readonly BOLD="$(tput bold 2>/dev/null || printf '\033[1m')"
+    readonly RED="$(tput setaf 1 2>/dev/null || printf '\033[31m')"
+    readonly GREEN="$(tput setaf 2 2>/dev/null || printf '\033[32m')"
+    readonly YELLOW="$(tput setaf 3 2>/dev/null || printf '\033[33m')"
+    readonly BLUE="$(tput setaf 4 2>/dev/null || printf '\033[34m')"
+    readonly MAGENTA="$(tput setaf 5 2>/dev/null || printf '\033[35m')"
+    readonly CYAN="$(tput setaf 6 2>/dev/null || printf '\033[36m')"
+    readonly WHITE="$(tput setaf 7 2>/dev/null || printf '\033[37m')"
+    readonly BG_RED="$(tput setab 1 2>/dev/null || printf '\033[41m')"
 else
     readonly RESET=''
     readonly BOLD=''
-    readonly GREEN=''
     readonly RED=''
+    readonly GREEN=''
     readonly YELLOW=''
+    readonly BLUE=''
+    readonly MAGENTA=''
+    readonly CYAN=''
     readonly WHITE=''
-    readonly BGRED=''
+    readonly BG_RED=''
 fi
 
 # Composite styles.
-readonly ERROR="${BOLD}${WHITE}${BGRED}"
-readonly WARNING="${BOLD}${YELLOW}"
+readonly INFO="${BOLD}${CYAN}"
+readonly WARN="${BOLD}${YELLOW}"
+readonly ERROR="${BOLD}${WHITE}${BG_RED}"
 
 # Check if required commands are available.
 for cmd in docopts; do
