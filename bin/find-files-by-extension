@@ -2,7 +2,7 @@
 
 # Find files with specified extension.
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 # Use parameter expansion to remove the dot from the extension if present.

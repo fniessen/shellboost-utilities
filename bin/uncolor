@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? uncolor, Time-stamp: <2026-08-10 Mon 12:21>
+#? uncolor, Time-stamp: <2026-08-14 Fri 09:19>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -38,11 +38,13 @@ readonly EX_IOERR=74
 readonly EX_NOPERM=77
 readonly EX_CONFIG=78
 
-# Check if 'docopts' command is available.
-if ! command -v docopts >/dev/null 2>&1; then
-    printf '%s\n' "${0##*/}: command not found: docopts" >&2
-    exit "$EX_UNAVAILABLE"
-fi
+# Check if required commands are available.
+for cmd in docopts; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf '%s\n' "${0##*/}: command not found: $cmd" >&2
+        exit $EX_UNAVAILABLE
+    fi
+done
 
 # Extract help and version information from the script.
 help=$(grep '^##[?]' "$0" | cut -c 5-)

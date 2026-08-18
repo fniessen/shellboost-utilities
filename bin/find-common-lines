@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? find-common-lines, Time-stamp: <2025-08-02 Sat 12:09>
-#? Copyright (C) 2024-2025 Fabrice Niessen. All rights reserved.
+#? find-common-lines, Time-stamp: <2026-08-10 Mon 11:47>
+#? Copyright (C) 2024-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -19,25 +19,25 @@
 ##?   -h, --help                    Display this help and exit.
 ##?   -V, --version                 Show version.
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 # Check if required commands are available.
 for cmd in docopts dos2unix; do
-    if ! command -v "$cmd" > /dev/null 2>&1; then
-        printf >&2 "Error: '%s' command not found.\n" "$cmd"
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf '%s\n' "${0##*/}: command not found: $cmd" >&2
         exit 2
     fi
 done
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 # Function to remove temporary files.
@@ -50,7 +50,7 @@ trap cleanup INT
 
 # Check if files exist and are regular files.
 if [[ ! -f "$FILE1" || ! -f "$FILE2" ]]; then
-    printf >&2 "Error: Both arguments must be regular files that exist.\n"
+    printf "Error: Both arguments must be regular files that exist.\n" >&2
     exit 2
 fi
 
@@ -63,7 +63,7 @@ cp "$FILE1" "$temp_file1"
 cp "$FILE2" "$temp_file2"
 
 # Convert temporary files to Unix format (dos2unix).
-dos2unix "$temp_file1" "$temp_file2" > /dev/null 2>&1
+dos2unix "$temp_file1" "$temp_file2" >/dev/null 2>&1
 
 # Sort both temporary files and use `comm` to find common lines.
 common_lines=$(comm -12 <(sort "$temp_file1") <(sort "$temp_file2"))
@@ -71,7 +71,7 @@ common_lines=$(comm -12 <(sort "$temp_file1") <(sort "$temp_file2"))
 if [[ -z "$common_lines" ]]; then
     printf "No common lines found.\n"
 else
-    printf >&2 "Common lines:\n"
+    printf "Common lines:\n" >&2
     printf "%s\n" "$common_lines"
 fi
 

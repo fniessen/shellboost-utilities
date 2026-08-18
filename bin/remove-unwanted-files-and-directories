@@ -33,18 +33,18 @@ patterns=(
 # Remove unwanted files and directories from defined directories.
 for directory in "${directories[@]}"; do
     printf "Removing files and directories from %s...\n" "$directory"
-    find "$directory" -mindepth 1 -maxdepth 1 -exec rm -rf -v {} + 2> /dev/null
+    find "$directory" -mindepth 1 -maxdepth 1 -exec rm -rf -v {} + 2>/dev/null
 done
 
 # Remove specific files.
 printf "Removing specific files...\n"
-rm -v "$HOME/.emacs.d/projectile.cache" 2> /dev/null
-rm -v "$HOME/.lesshst" 2> /dev/null
+rm -v "$HOME/.emacs.d/projectile.cache" 2>/dev/null
+rm -v "$HOME/.lesshst" 2>/dev/null
 
 # Remove files matching patterns.
 for pattern in "${patterns[@]}"; do
     printf "Removing files matching pattern %s...\n" "$pattern"
-    find "$HOME" -iname "$pattern" -exec rm -rf -v {} + 2> /dev/null
+    find "$HOME" -iname "$pattern" -exec rm -rf -v {} + 2>/dev/null
 done
 
 # Exit with a success code.

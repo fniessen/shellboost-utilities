@@ -20,7 +20,7 @@ NC='\033[0m' # No Color
 PATTERN="${1:-*}"
 
 # TODO: Sort on seconds and milliseconds like in:
-# find . -type f -print0 | xargs -0 stat --format "%Y :%y %n" 2> /dev/null | sort -nr | cut -d: -f2- | head
+# find . -type f -print0 | xargs -0 stat --format "%Y :%y %n" 2>/dev/null | sort -nr | cut -d: -f2- | head
 
 
 # find . -type f -printf "%A@ %T@ %C@ %p\n" | while IFS=' ' read -r atime mtime ctime file_path; do
@@ -32,7 +32,7 @@ PATTERN="${1:-*}"
 
 
 # Use find to locate files matching the pattern and avoid .git directories.
-find . -type d -name ".git" -prune -o -type f -iname "*$PATTERN*" -printf "%T@ %TY-%Tm-%Td %Ta %TH:%TM - %P\n" 2> /dev/null \
+find . -type d -name ".git" -prune -o -type f -iname "*$PATTERN*" -printf "%T@ %TY-%Tm-%Td %Ta %TH:%TM - %P\n" 2>/dev/null \
     | sort -n \
     | cut -d " " -f 2- \
     | awk -v RED="$RED" -v ORANGE="$ORANGE" -v YELLOW="$YELLOW" -v GREEN="$GREEN" -v BLUE="$BLUE" -v MAGENTA="$MAGENTA" -v NC="$NC" '

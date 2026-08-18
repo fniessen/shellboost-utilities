@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? unbak, Time-stamp: <2025-08-02 Sat 12:08>
-#? Copyright (C) 2020-2025 Fabrice Niessen. All rights reserved.
+#? unbak, Time-stamp: <2026-08-10 Mon 11:50>
+#? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -21,23 +21,23 @@
 ##? Examples:
 ##?   unbak core/main_bak.c
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 # Check if 'docopts' command is available.
-if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 "Error: 'docopts' command not found.\n"
+if ! command -v docopts >/dev/null 2>&1; then
+    printf '%s\n' "${0##*/}: command not found: docopts" >&2
     exit 2
 fi
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 # Define the backup file extension constant.
@@ -61,13 +61,13 @@ RESET=$(tput sgr0)
 
 # Check if file exists and is a regular file.
 if [[ ! -f "$FILE" ]]; then
-    printf >&2 "ERROR: Argument must be a regular file that exists.\n"
+    printf "ERROR: Argument must be a regular file that exists.\n" >&2
     exit 2
 fi
 
 # Check if the file name contains '_bak'.
 if ! file_contains_bak "$FILE"; then
-    printf >&2 "Error: File '${BOLD}$FILE${RESET}' does not contain '${BOLD}$BAK_EXTENSION${RESET}' in its name.\n"
+    printf "Error: File '${BOLD}$FILE${RESET}' does not contain '${BOLD}$BAK_EXTENSION${RESET}' in its name.\n" >&2
     exit 2
 fi
 
@@ -93,17 +93,19 @@ original_file_with_extension="$original_file$extension"
 if [[ -f "$original_directory/$original_file_with_extension" ]]; then
     printf "The file '${BOLD}$original_file_with_extension${RESET}' already exists.\n"
 
-    # Disable 'set -e' temporarily to handle potential errors during command execution.
+    # Temporarily disable fail-fast error handling.
     set +e
 
     # Check if 'colordiff' is installed, and use it for colorized output,
     # fallback to 'diff'.
     diff_cmd="diff"
-    if command -v colordiff > /dev/null 2>&1; then
+    if command -v colordiff >/dev/null 2>&1; then
         diff_cmd="colordiff"
     fi
 
     diff_output=$($diff_cmd "$original_directory/$original_file_with_extension" "$FILE")
+
+    # Re-enable fail-fast error handling.
     set -e
 
     if [[ -n "$diff_output" ]]; then

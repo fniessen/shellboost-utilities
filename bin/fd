@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? fd, Time-stamp: <2026-08-10 Mon 10:39>
+#? fd, Time-stamp: <2026-08-10 Mon 11:47>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -44,7 +44,7 @@ eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 # Silence AI false positives: PATTERN is set dynamically by docopts.
 PATTERN="${PATTERN:-}"
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 # Color configuration.

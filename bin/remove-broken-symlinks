@@ -14,7 +14,7 @@ printf "Searching for broken symbolic links...\n"
 broken_symlinks=()
 while IFS= read -r -d '' link; do
     broken_symlinks+=( "$link" )
-done < <(find . -type l ! -exec test -e {} \; -print0 2> /dev/null)
+done < <(find . -type l ! -exec test -e {} \; -print0 2>/dev/null)
 
 # Check if any links were found.
 if (( ${#broken_symlinks[@]} == 0 )); then

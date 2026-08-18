@@ -4,7 +4,7 @@ find . -type d -name '.git' -prune -o -type f -not -empty -print0 \
     | xargs -0 -n1 md5sum -b \
     | sort --key=1,32 \
     | uniq -w 32 -D \
-    | sed -E 's|\*\.\/||' \
+    | sed -E 's_\*\.\/__' \
     | awk '{ short=substr($1,1,7); $1=""; sub(/^ +/,""); print short, "", $0 }' \
     | sort -k2
 
@@ -20,7 +20,7 @@ find . -type d -name '.git' -prune -o -type f -not -empty -print0 \
 # echo "#! /bin/sh" > $OUTF;
 # find "$@" -type f -exec md5sum {} \; |
 #     sort --key=1,32 | uniq -w 32 -d --all-repeated=separate |
-#     sed -r 's/^[0-9a-f]*( )*//;s/([^a-zA-Z0-9./_-])/\\\1/g;s/(.+)/#rm \1/' >> $OUTF;
+#     sed -r 's_^[0-9a-f]*( )*__;s_([^a-zA-Z0-9./_-])_\\\1_g;s_(.+)_#rm \1_' >> $OUTF;
 # chmod a+x $OUTF; ls -l $OUTF
 # #+end_src
 #

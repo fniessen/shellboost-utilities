@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? split-log, Time-stamp: <2025-08-02 Sat 12:08>
-#? Copyright (C) 2024-2025 Fabrice Niessen. All rights reserved.
+#? split-log, Time-stamp: <2026-08-10 Mon 11:51>
+#? Copyright (C) 2024-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -19,25 +19,25 @@
 ##?   -h, --help                    display this help and exit
 ##?   -V, --version                 display version information and exit
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 # Check if required commands are available.
 for cmd in docopts bc; do
-    if ! command -v "$cmd" > /dev/null 2>&1; then
-        printf >&2 "Error: '%s' command not found.\n" "$cmd"
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf '%s\n' "${0##*/}: command not found: $cmd" >&2
         exit 2
     fi
 done
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 # Define the input log file and the desired output prefix.
@@ -47,13 +47,13 @@ SIZE=2G
 
 # Check if file exists and is a regular file.
 if [[ ! -f "$FILE" ]]; then
-    printf >&2 "ERROR: Argument must be a regular file that exists.\n"
+    printf "ERROR: Argument must be a regular file that exists.\n" >&2
     exit 2
 fi
 
 # Ensure the file has a '.log' extension.
 if [[ "$FILE" != *.log ]]; then
-    printf >&2 "ERROR: File must have a .log extension.\n"
+    printf "ERROR: File must have a .log extension.\n" >&2
     exit 2
 fi
 
@@ -61,7 +61,7 @@ fi
 FILE_SIZE=$(stat -c%s "$FILE")
 
 # Convert SIZE to bytes using bc
-SIZE_BYTES=$(printf "%s\n" "$SIZE" | sed -e 's/G/*1024*1024*1024/' -e 's/M/*1024*1024/' -e 's/K/*1024/' -e 's/^ *//' -e 's/ *$//' | bc)
+SIZE_BYTES=$(printf "%s\n" "$SIZE" | sed -e 's_G_*1024*1024*1024_' -e 's_M_*1024*1024_' -e 's_K_*1024_' -e 's_^ *__' -e 's_ *$__' | bc)
 
 # Check if the file is smaller than the specified size; exit if it is.
 if [[ "$FILE_SIZE" -lt "$SIZE_BYTES" ]]; then
@@ -78,7 +78,7 @@ if [[ "$ENCODING" == "utf-16le" || "$ENCODING" == "utf-16be" ]]; then
     iconv -f UTF-16 -t UTF-8 "$FILE" -o "$CONVERTED_FILE"
 
     if [[ $? -ne 0 ]]; then
-        printf >&2 "\nFailed to convert %s to UTF-8.\n" "$FILE"
+        printf "\nFailed to convert %s to UTF-8.\n" "$FILE" >&2
         exit 2
     fi
 
@@ -89,12 +89,12 @@ fi
 
 # Remove BOM from all lines.
 printf "Removing BOM characters... "
-sed -i 's/^\xEF\xBB\xBF//' "$FILE"
+sed -i 's_^\xEF\xBB\xBF__' "$FILE"
 printf "Done\n"
 
 # Remove trailing ^M characters from all lines.
 printf "Removing trailing ^M characters... "
-sed -i 's/\r$//' "$FILE"
+sed -i 's_\r$__' "$FILE"
 printf "Done\n"
 
 # Start the split process in the background.
@@ -102,21 +102,20 @@ printf "Done\n"
 split -b $SIZE -d --additional-suffix=.log --numeric-suffixes=1 "$FILE" "$OUTPREFIX" &
 SPLIT_PID=$!
 
-# Disable 'set -e' temporarily to handle potential errors during command
-# execution.
+# Temporarily disable fail-fast error handling.
 set +e
 
 # Show a progress indicator.
 printf "Splitting in progress:\n"
-while kill -0 "$SPLIT_PID" 2> /dev/null; do
+while kill -0 "$SPLIT_PID" 2>/dev/null; do
     # Count the number of split files created.
-    FILE_COUNT=$(ls "${OUTPREFIX}"*.log 2> /dev/null | wc -l)
+    FILE_COUNT=$(ls "${OUTPREFIX}"*.log 2>/dev/null | wc -l)
     # Display progress.
     printf "\rNumber of files created: %d" "$FILE_COUNT"
     sleep 1
 done
 
-# Re-enable 'set -e' after command execution.
+# Re-enable fail-fast error handling.
 set -e
 
 # Wait for the split process to finish.

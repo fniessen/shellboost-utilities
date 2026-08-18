@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-printf "rg-query %s 2> /dev/null\n" "$@"
+printf "rg-query %s 2>/dev/null\n" "$@"
 query="$(rg-query "$@")"
 printf "Query: %s.\n" "$query"
 rg -lU --multiline-dotall "$query" .

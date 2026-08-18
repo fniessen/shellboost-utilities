@@ -14,21 +14,21 @@ usage() {
 }
 
 exiftagsexist() {
-    if ! which exiftool > /dev/null 2>&1; then
+    if ! which exiftool >/dev/null 2>&1; then
         echo "Unable to locate exiftool binary. Please make sure it is installed and is in your path."
         exit 0
     fi
 }
 
 gotodir() {
-    if ! cd $1 > /dev/null 2>&1; then
+    if ! cd "$1" >/dev/null 2>&1; then
         echo "Directory does not exist. Please try again."
         exit 0
     fi
 }
 
 jpgexist() {
-    if ! find . -iname "*.jpg" -type f > /dev/null 2>&1; then
+    if ! find . -iname "*.jpg" -type f >/dev/null 2>&1; then
         echo "There are no JPEG pictures in this directory. Please try again."
         exit 0
     fi
@@ -36,14 +36,14 @@ jpgexist() {
 
 myexifdater() {
     for i in *.jpg *.JPG *.jpeg *.JPEG; do
-        echo $i
-        create_date=$(exiftool "$i" 2>&1 | grep "Create Date" | cut -d" " -f3 | sed -e 's/:/-/g')
+        printf '%s\n' "$i"
+        create_date=$(exiftool "$i" 2>&1 | grep "Create Date" | cut -d" " -f3 | sed -e 's_:_-_g')
         if [[ "$create_date" == "" ]]; then
             echo "SKIPPING IMAGE $i [NO EXIF DATA FOUND]"
             continue
         fi
         echo -n "Processing Image $i Created on $create_date"
-        # do_rename=$(echo $i | sed -e 's/\(.*\)/mv "&" "'$create_date'_\1"/g' | sh)
+        # do_rename=$(echo "$i" | sed -e 's_\(.*\)_mv "&" "'$create_date'_\1"_g' | sh)
         echo "[DONE]"
     done
 }

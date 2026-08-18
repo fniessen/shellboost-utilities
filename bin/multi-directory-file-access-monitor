@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? Time-stamp: <2025-08-02 Sat 12:09>
-#? Copyright (C) 2023-2025 Fabrice Niessen. All rights reserved.
+#? Time-stamp: <2026-08-10 Mon 11:53>
+#? Copyright (C) 2023-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -19,28 +19,28 @@
 ##?   -h, --help                    display this help and exit
 ##?   -V, --version                 display version information and exit
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 # Check if 'docopts' command is available.
-if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 "Error: 'docopts' command not found.\n"
+if ! command -v docopts >/dev/null 2>&1; then
+    printf '%s\n' "${0##*/}: command not found: docopts" >&2
     exit 2
 fi
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 # Check if 'inotifywait' command is available.
-if ! command -v inotifywait > /dev/null 2>&1; then
-    printf >&2 "Error: 'inotifywait' command not found. Please install inotify-tools.\n"
+if ! command -v inotifywait >/dev/null 2>&1; then
+    printf "Error: 'inotifywait' command not found. Please install inotify-tools.\n" >&2
     exit 2
 fi
 
@@ -49,27 +49,27 @@ readonly DIRECTORY="${DIRECTORY:-./}"
 
 # Check if the root directory exists.
 if [[ ! -d "$DIRECTORY" ]]; then
-    printf >&2 'Error: The specified root directory does not exist.\n'
+    printf 'Error: The specified root directory does not exist.\n' >&2
     exit 2
 fi
 
-# Disable -e for the find command.
+# Temporarily disable fail-fast error handling.
 set +e
 
 # Use find to locate all READABLE directories, hiding "permission denied" errors.
-directories=($(find "$DIRECTORY" -type d -readable -not -name '*.git*' 2> /dev/null))
+directories=($(find "$DIRECTORY" -type d -readable -not -name '*.git*' 2>/dev/null))
 
-# Re-enable -e.
+# Re-enable fail-fast error handling.
 set -e
 
 # Check if there are subdirectories to monitor.
 num_directories_found=${#directories[@]}
 if [[ $num_directories_found -eq 1 ]]; then
     # Display the warning if there are no subdirectories.
-    printf >&2 'Warning: No subdirectories found to monitor under the root directory.\n'
+    printf 'Warning: No subdirectories found to monitor under the root directory.\n' >&2
 elif [[ $num_directories_found -gt 32768 ]]; then
     # Exit if the number of directories exceeds the limit.
-    printf >&2 'Error: Number of directories exceeds the limit. Exiting.\n'
+    printf 'Error: Number of directories exceeds the limit. Exiting.\n' >&2
     exit 2
 fi
 
@@ -125,7 +125,7 @@ done
 # Wait for a short time to ensure the messages from inotifywait are displayed first.
 sleep 1
 
-printf >&2 "\e[1;33mMonitoring all file accesses in $num_directories_found readable directories. Press Ctrl+C to stop monitoring...\e[0m\n"
+printf "\e[1;33mMonitoring all file accesses in $num_directories_found readable directories. Press Ctrl+C to stop monitoring...\e[0m\n" >&2
 
 # Wait for user input to exit the monitoring.
 wait

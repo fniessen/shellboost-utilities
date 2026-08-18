@@ -6,7 +6,7 @@
 # working directory and moving upwards towards the root directory, excluding the
 # root directory itself.
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 while [[ "$PWD" != "/" ]]; do

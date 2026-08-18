@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? find-large-files, Time-stamp: <2026-08-10 Mon 11:33>
+#? find-large-files, Time-stamp: <2026-08-10 Mon 11:44>
 #? Copyright (C) 2023-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -9,7 +9,7 @@
 
 ##? Usage: find-large-files [options]
 ##?
-##? Find large files.
+##? Find large files (≥ 50 MB).
 ##?
 ##? Options:
 ##?   -h, --help                    display this help and exit
@@ -31,7 +31,7 @@ version=$(grep '^#[?]' "$0" | cut -c 4-)
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 # Minimum file size in MB.

@@ -6,7 +6,7 @@
 
 # Check for required arguments.
 if [[ $# -ne 2 ]]; then
-    printf >&2 "Usage: %s FILE REF\n" "$(basename "$0")"
+    printf "Usage: %s FILE REF\n" "$(basename "$0")" >&2
     exit 2
 fi
 
@@ -15,18 +15,18 @@ REF="$2"
 
 # Check if both arguments are files and exist.
 if [[ ! -e "$FILE" ]]; then
-    printf >&2 "Error: File '%s' does not exist.\n" "$FILE"
+    printf "Error: File '%s' does not exist.\n" "$FILE" >&2
     exit 2
 fi
 
 if [[ ! -e "$REF" ]]; then
-    printf >&2 "Error: Reference file '%s' does not exist.\n" "$REF"
+    printf "Error: Reference file '%s' does not exist.\n" "$REF" >&2
     exit 2
 fi
 
 # Compare file timestamps.
-if [[ "$FILE" -le "$REF" ]]; then
-    printf >&2 "%s is older than or the same age as %s\n" "$FILE" "$REF"
+if [[ ! "$FILE" -nt "$REF" ]]; then
+    printf "%s is older than or the same age as %s\n" "$FILE" "$REF" >&2
     exit 2
 fi
 

@@ -14,9 +14,9 @@ SUCCESS_COLOR=$(tput setaf 2)
 FAIL_COLOR=$(tput setaf 1)
 TIMEOUT_MSG_COLOR=$(tput setaf 7)$(tput bold)$(tput setab 1)
 
-# Check if the command exists.
-if ! command -v "${COMMAND[0]}" > /dev/null 2>&1; then
-    printf >&2 "Error: Command '%s' not found.\n" "${COMMAND[0]}"
+# Check if the command is available.
+if ! command -v "${COMMAND[0]}" >/dev/null 2>&1; then
+    printf '%s\n' "${0##*/}: command not found: ${COMMAND[0]}" >&2
     exit 2
 fi
 

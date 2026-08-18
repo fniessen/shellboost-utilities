@@ -17,7 +17,7 @@ trap cleanup SIGINT
 # multiple lines.
 find . -type f -name "*.css" -print0 | while read -r -d $'\0' file; do
     printf "%s\n" "$file"
-    sed 's/;/;\n/g' "$file" > "$file.split"
+    sed 's_;_;\n_g' "$file" > "$file.split"
 done
 
 # Search for the given term in all split CSS files, showing 3 lines of context

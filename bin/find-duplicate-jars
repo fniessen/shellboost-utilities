@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? find-duplicate-jars, Time-stamp: <2025-08-02 Sat 12:09>
-#? Copyright (C) 2020-2025 Fabrice Niessen. All rights reserved.
+#? find-duplicate-jars, Time-stamp: <2026-08-18 Tue 10:07>
+#? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -15,23 +15,23 @@
 ##?   -h, --help                    display this help and exit
 ##?   -V, --version                 display version information and exit
 
-# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+# Exit on undefined variables and pipeline errors.
 set -uo pipefail
 
 # Check if 'docopts' command is available.
-if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 "Error: 'docopts' command not found.\n"
+if ! command -v docopts >/dev/null 2>&1; then
+    printf '%s\n' "${0##*/}: command not found: docopts" >&2
     exit 2
 fi
 
 # Extract help and version information from the script.
-help=$(grep -E '^##\?' "$0" | cut -c 5-)
-version=$(grep -E '^#\?' "$0" | cut -c 4-)
+help=$(grep '^##[?]' "$0" | cut -c 5-)
+version=$(grep '^#[?]' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
 eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
-# Set -e to exit on non-zero command status.
+# Exit on command failures.
 set -e
 
 # Specify the directory containing the jar files.
@@ -44,8 +44,8 @@ declare -A jar_groups
 # Collect all JAR files and group them.
 while IFS= read -r -d '' jar_file; do
     base_name=$(basename "$jar_file" .jar)
-    version=$(printf "%s\n" "$base_name" | sed -E 's/.*-([0-9][0-9.]*(-[A-Za-z0-9]*)*).*/\1/')
-    key=$(printf "%s\n" "$base_name" | sed "s/-${version}$//")
+    version=$(printf "%s\n" "$base_name" | sed -E 's_.*-([0-9][0-9.]*(-[A-Za-z0-9]*)*).*_\1_')
+    key=$(printf "%s\n" "$base_name" | sed "s_-${version}$__")
 
     # Append to the group (using newline as separator).
     # Use parameter expansion with default value to handle first occurrence.
@@ -70,11 +70,11 @@ for key in "${!jar_groups[@]}"; do
     duplicates=("${sorted_versions[@]:1}")
 
     # Extract clean version numbers
-    recent_version=$(basename "$most_recent" | sed -E 's/.*-([0-9][0-9.]*(-[A-Za-z0-9]*)*).jar/\1.jar/')
+    recent_version=$(basename "$most_recent" | sed -E 's_.*-([0-9][0-9.]*(-[A-Za-z0-9]*)*)\.jar_\1.jar_')
 
     # Print duplicates.
     for old_version_path in "${duplicates[@]}"; do
-        old_version=$(basename "$old_version_path" | sed -E 's/.*-([0-9][0-9.]*(-[A-Za-z0-9]*)*).jar/\1.jar/')
+        old_version=$(basename "$old_version_path" | sed -E 's_.*-([0-9][0-9.]*(-[A-Za-z0-9]*)*)\.jar_\1.jar_')
         printf -- "\033[1;37;41m- Found duplicate jar file: %s (Old: %s → New: %s)\033[0m\n" "$key" "$old_version" "$recent_version"
     done
 done

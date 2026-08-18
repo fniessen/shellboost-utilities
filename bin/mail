@@ -3,7 +3,7 @@
 
 Usage()
 {
-    cat << EOF 1>&2
+    cat << EOF >&2
 Usage: $SCRIPT_NAME [-s SUBJECT] [-a ATTACHMENT]... [-c CC-ADDR] [-b BCC-ADDR] [-f FROM-ADDR] TO-ADDR
 Try '$SCRIPT_NAME -h' for more information.
 EOF
@@ -85,7 +85,7 @@ do
         die "File $attach does not exist or is not readable."
     else
         # binary vs text file
-        if [[ "$(file --brief --mime "$attach" 2> /dev/null | cut -d/ -f 1)" = "text" ]]
+        if [[ "$(file --brief --mime "$attach" 2>/dev/null | cut -d/ -f 1)" = "text" ]]
         then
             ATT_SWITCH="$ATT_SWITCH -attacht $(cygpath -w "$attach")"
         else
