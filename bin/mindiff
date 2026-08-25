@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# mindiff - Compare deux fichiers avec un diff minimal (caractère par
+# caractère), insensible aux espaces.
+#
+# Usage: mindiff fichier1 fichier2
+
+set -euo pipefail
+
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $(basename "$0") <fichier1> <fichier2>" >&2
+    exit 1
+fi
+
+git diff --no-index -w --word-diff-regex=. --color-words -U0 "$1" "$2"
+exit_code=$?
+
+if [ "$exit_code" -gt 1 ]; then
+    exit "$exit_code"
+fi
+
+exit 0

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# wdiff - Compare deux fichiers avec un diff mot-par-mot coloré.
+#
+# Usage: wdiff fichier1 fichier2
+
+set -euo pipefail
+
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $(basename "$0") <fichier1> <fichier2>" >&2
+    exit 1
+fi
+
+git diff --no-index --color-words "$1" "$2"
+exit_code=$?
+
+# git diff --no-index retourne 1 si les fichiers diffèrent : ce n'est pas une erreur
+if [ "$exit_code" -gt 1 ]; then
+    exit "$exit_code"
+fi
+
+exit 0
