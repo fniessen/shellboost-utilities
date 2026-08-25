@@ -11,9 +11,9 @@ COMMAND=("$@")
 BOLD=$(tput bold)
 RESET=$(tput sgr0)
 
-# Check if the command exists.
-if ! command -v "${COMMAND[0]}" > /dev/null 2>&1; then
-    printf >&2 "Error: Command '%s' not found.\n" "${COMMAND[0]}"
+# Check if the command is available.
+if ! command -v "${COMMAND[0]}" >/dev/null 2>&1; then
+    printf '%s\n' "${0##*/}: command not found: ${COMMAND[0]}" >&2
     exit 2
 fi
 
@@ -33,7 +33,7 @@ printf "0        1         2         3         4         5         6         7  
 # Run the command 100 times and store the execution times.
 for i in {1..100}; do
     start_time=$(date +%s%N) # Current time in nanoseconds.
-    "${COMMAND[@]}" > /dev/null 2>&1 # Run the command and discard output.
+    "${COMMAND[@]}" >/dev/null 2>&1 # Run the command and discard output.
     # exit_code=$?
     end_time=$(date +%s%N)
 
