@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Mesure les temps d'une requête HTTP.
+URL="${1:-https://example.com}"
+
+curl -o /dev/null -s -w "%{time_namelookup} %{time_connect} %{time_appconnect} %{time_total}\n" "$URL" |
+    awk '{printf "DNS:     %4.0f ms\nConnect: %4.0f ms\nTLS:     %4.0f ms\nTotal:   %4.0f ms\n", $1*1000, $2*1000, $3*1000, $4*1000}'
