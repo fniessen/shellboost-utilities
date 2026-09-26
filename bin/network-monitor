@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+# Monitor network connectivity by pinging the configured targets every five
+# seconds. Results are appended to a CSV log when a target changes state.
+#
+# Start in the background:
+#   nohup ./network-monitor > network-monitor.out 2>&1 &
+#
+# Find the running process:
+#   pgrep -af network-monitor
+#
+# Stop the monitor:
+#   pkill -f network-monitor
+#
+# Watch state changes in real time:
+#   tail -f "$HOME/network-monitor.csv"
+#
+# Display all recorded failures:
+#   awk -F, '$3 == "DOWN"' "$HOME/network-monitor.csv"
+#
+# Count failures by host:
+#   awk -F, '$3 == "DOWN" { count[$2]++ }
+#       END { for (host in count) print host, count[host] }' \
+#       "$HOME/network-monitor.csv"
+
+INTERVAL=5
+LOGFILE="$HOME/network-monitor.csv"
+
+TARGETS=(
+    "192.168.2.1"
+    "192.168.0.1"
+    "8.8.8.8"
+)
+
+declare -A STATUS
+
+if [[ ! -e "$LOGFILE" ]]; then
+    printf "timestamp,host,status\n" > "$LOGFILE"
+fi
+
+while true; do
+    for host in "${TARGETS[@]}"; do
+        if ping -c 1 -W 2 "$host" >/dev/null 2>&1; then
+            new_status="UP"
+        else
+            new_status="DOWN"
+        fi
+
+        old_status="${STATUS[$host\\]:-}"
+
+        if [[ "$new_status" != "$old_status" ]]; then
+            timestamp=$(date '+%F %a %T')
+
+            printf "%s,%s,%s\n" \
+                "$timestamp" \
+                "$host" \
+                "$new_status" >> "$LOGFILE"
+
+            printf "%s %s -> %s\n" \
+                "$timestamp" \
+                "$host" \
+                "$new_status"
+
+            STATUS["$host"]="$new_status"
+        fi
+    done
+
+    sleep "$INTERVAL"
+done
