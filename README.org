@@ -119,11 +119,11 @@ Expand every .zip file into separate directories.
 
 Find directories or files matching a string and print their full file name.
 
-** fd
+** fdirs
 
 Find directories matching a string and print their full file name.
 
-** ff
+** ffiles
 
 Find files matching a string and print their full file name.
 
@@ -300,6 +300,8 @@ Update package list and upgrade all installed packages to their latest versions.
 
 * Contribute to the project!
 
+** Boilerplate shell script
+
 ** Best Practices
 
 Bash scripting can be a powerful tool for automating tasks, but it's important
@@ -396,8 +398,8 @@ ERROR="${BOLD}${WHITE}${BGRED}"
 check_required_commands() {
     local cmd
     for cmd in "$@"; do
-        if ! command -v "$cmd" > /dev/null 2>&1; then
-            printf >&2 "${ERROR}ERROR: '%s' command not found.${RESET}\n" "$cmd"
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            printf "${ERROR}ERROR: '%s' command not found.${RESET}\n" "$cmd" >&2
             exit $EX_UNAVAILABLE
         fi
     done

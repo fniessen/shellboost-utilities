@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-#? ff, Time-stamp: <2026-08-14 Fri 16:19>
+#? ffiles, Time-stamp: <2026-09-30 Wed 11:10>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
-##? Usage: ff [options] [PATTERN]
+##? Usage: ffiles [options] [PATTERN]
 ##?
 ##? Find files matching a string and print their full file name.
 ##?
@@ -22,8 +22,8 @@
 ##?   -V, --version                 display version information and exit
 ##?
 ##? Examples:
-##?   ff                            list all files
-##?   ff admin                      list files matching admin in their name
+##?   ffiles                        list all files
+##?   ffiles admin                  list files matching admin in their name
 
 # {{{ Boilerplate
 

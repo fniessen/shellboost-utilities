@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-#? fd, Time-stamp: <2026-08-10 Mon 11:47>
+#? fdirs, Time-stamp: <2026-09-30 Wed 11:08>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
-##? Usage: fd [options] [PATTERN]
+##? Usage: fdirs [options] [PATTERN]
 ##?
 ##? Find directories matching a string and print their full file name.
 ##?
@@ -22,8 +22,8 @@
 ##?   -V, --version                 Display version information and exit
 ##?
 ##? Examples:
-##?   fd                            List all directories
-##?   fd doc                        List directories matching doc in their name
+##?   fdirs                         List all directories
+##?   fdirs doc                     List directories matching doc in their name
 
 # Exit on undefined variables and pipeline errors.
 set -uo pipefail

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? f, Time-stamp: <2026-08-10 Mon 10:31>
+#? f, Time-stamp: <2026-09-30 Wed 11:13>
 #? Copyright (C) 2020-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -69,8 +69,8 @@ eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
 # Find and colorize matching directory or file names, hiding permission denied
 # errors.
-fd "$PATTERN"
-ff "$PATTERN"
+fdirs "$PATTERN"
+ffiles "$PATTERN"
 
 # Exit with a success code.
 exit $EX_OK
