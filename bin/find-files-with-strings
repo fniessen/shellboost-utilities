@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? find-files-with-strings, Time-stamp: <2026-08-18 Tue 10:14>
+#? find-files-with-strings, Time-stamp: <2026-10-07 Wed 15:10>
 #? Copyright (C) 2023-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -91,7 +91,7 @@ find_command="find . -type f -print0 2>/dev/null"
 grep_command="xargs -0 -r grep --files-with-matches --null $grep_options -- \"${search_strings[0]}\""
 
 for i in "${search_strings[@]:1}"; do
-    grep_command+=" | xargs -0 -r grep --files-with-matches --null $grep_options -- \"$i\""
+    grep_command+=" | xargs -0 -r grep -s --files-with-matches --null $grep_options -- \"$i\""
 done
 
 # Combine find and grep commands.
@@ -107,10 +107,7 @@ status=$?
 # Re-enable fail-fast error handling.
 set -e
 
-# Exit immediately if command execution failed unexpectedly.
-if (( status != 0 )); then
-    exit "$status"
-fi
+debug "Status: $status"
 
 # Print the output only if it's not empty.
 if [[ -n "$output_command" ]]; then
@@ -118,5 +115,5 @@ if [[ -n "$output_command" ]]; then
     printf '%s\n' "$output_command" | sed 's#^\./##'
 fi
 
-# Exit with a success code.
-exit 0
+# Exit with original status.
+exit "$status"
