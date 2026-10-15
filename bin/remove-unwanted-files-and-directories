@@ -28,6 +28,8 @@ patterns=(
     '*.yas-compiled-snippets.el'
     'nul'
     'null'
+    '*.ind'    # LaTeX index files
+    '*.ilg'    # LaTeX log index files
 )
 
 # Remove unwanted files and directories from defined directories.
