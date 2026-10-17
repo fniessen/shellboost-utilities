@@ -30,6 +30,7 @@ patterns=(
     'null'
     '*.ind'    # LaTeX index files
     '*.ilg'    # LaTeX log index files
+    '#%2Aediff-merge%2A#*#'    # Emacs auto-save files of *ediff-merge* buffers
 )
 
 # Remove unwanted files and directories from defined directories.
