@@ -34,6 +34,6 @@ find . -type d -name '.git' -prune -o -type f -not -empty -print0 \
 # 8. Write out commented-out delete commands
 # 9. Make the output script writable and =ls -l= it
 #
-# If you prefer a C program, try e.g. =fdupes= (may also be available in the the
+# If you prefer a C program, try e.g. =jdupes= (may also be available in the the
 # repository of you favorite Linux distribution). For a GUI based solution,
 # =fslint= might do it for you.

@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 
-fdupes -r . \
-    | grep -v -e "/.svn/" \
-              -e "/.git/" \
-              -e "/.gitkeep" \
-              -e "/.emacs.d/backups" \
-    | uniq \
-    | awk 'BEGIN {RS="\n\n"; ORS="\n\n"; FS="\n"} {if (NF>1) print}'
+if ! command -v jdupes >/dev/null; then
+    printf 'jdupes is required.\n' >&2
+    exit 127
+fi
+
+jdupes -r -S \
+    -X nostr:/.git/ \
+    -X nostr:/.svn/ \
+    -X nostr:/.gitkeep \
+    -X nostr:/.emacs.d/backups \
+    .
 
 # Exit with a success code.
 exit 0

@@ -4,13 +4,13 @@
 
 set -euo pipefail
 
-if command -v fdupes >/dev/null; then
-    # fdupes is found, use it to find duplicate files
-    printf "Using fdupes command to find duplicate files\n"
-    fdupes -r . | sed 's|^\./||'
+if command -v jdupes >/dev/null; then
+    # jdupes is found, use it to find duplicate files
+    printf "Using jdupes command to find duplicate files\n"
+    jdupes -r -n -S -X nostr:/.git/ . | sed 's|^\./||'
 else
-    # fdupes is not found, use find command
-    printf "fdupes command not found, using find command to find duplicate files\n"
+    # jdupes is not found, use find command
+    printf "jdupes command not found, using find command to find duplicate files\n"
 
     # find duplicate files and print their names
     find . -type d -name .git -prune -o -type f -not -empty -exec md5sum {} + \
