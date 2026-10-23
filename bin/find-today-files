@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? find-today-files, Time-stamp: <2026-08-10 Mon 11:47>
+#? find-today-files, Time-stamp: <2026-10-23 Fri 09:59>
 #? Copyright (C) 2023-2026 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -59,7 +59,7 @@ fi
 
 # List files modified TODAY only (since start of day, i.e., 00:00), excluding
 # .git directories, and sort by full path.
-find "$DIRECTORY" -type d -name ".git" -prune -o -type f $find_filter -daystart -mtime 0 2>/dev/null \
+find "$DIRECTORY" -type d -name ".git" -prune -o -type f "$find_filter" -daystart -mtime 0 2>/dev/null \
      -printf "${DATE_TIME_COLOR}%CY-%Cm-%Cd %Ca %CH:%CM${NC} - ${DIR_COLOR}%h/${NC}${FILE_COLOR}%f${NC}\n" \
     | sort -k5 \
     | sed 's|./||'
