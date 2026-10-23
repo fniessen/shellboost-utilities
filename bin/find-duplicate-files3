@@ -11,8 +11,6 @@ if command -v fdupes >/dev/null; then
 else
     # fdupes is not found, use find command
     printf "fdupes command not found, using find command to find duplicate files\n"
-    # specify directory to search
-    dir="./"
 
     # find duplicate files and print their names
     find . -type d -name .git -prune -o -type f -not -empty -exec md5sum {} + \
